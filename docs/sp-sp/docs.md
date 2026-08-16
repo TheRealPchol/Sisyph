@@ -382,7 +382,10 @@ El programa pide una cadena, la compara con la palabra «НИЧЕГО» e imprim
 | Modo | Comando |
 |---|---|
 | Compilar | `python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py` |
+| Compilar a ELF | `python3 bsyhc.py -i b.syh -c -elf -o b_bin` |
+| Compilar a EXE | `python3 bsyhc.py -i b.syh -c -exe -o b.exe` |
 | Descompilar | `python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh` |
+| Descompilar un binario | `python3 bsyhc.py -i b_bin -d -o b-de.syh` |
 | Interpretar | `python3 bsyhc.py -i b.syh` |
 
 Si solo se indica un archivo de entrada (sin `-c` ni `-d`), BSYHC simplemente interpreta el programa, igual que `main.py`.
@@ -394,7 +397,9 @@ Si solo se indica un archivo de entrada (sin `-c` ni `-d`), BSYHC simplemente in
 | `-i, --input <archivo>` | archivo de entrada; puede repetirse para compilar varios archivos en una sola salida |
 | `-o, --output <archivo>` | archivo de salida (por defecto: `<entrada>.py` / `<entrada>.syh`) |
 | `-c, --compile` | compilar `.syh` en un `.py` autónomo |
-| `-d, --decompile` | descompilar un `.py` compilado de vuelta a `.syh` |
+| `-elf` | compilar `.syh` en un binario ELF mediante PyInstaller (Linux) |
+| `-exe` | compilar `.syh` en un binario EXE mediante PyInstaller (Windows) |
+| `-d, --decompile` | descompilar un `.py` compilado (o un binario BSYHC) de vuelta a `.syh` |
 | `--merge concat \| include` | forma de fusionar archivos al compilar (por defecto `concat`) |
 | `--split` | al descompilar, restaurar cada archivo fuente por separado (en el directorio de `-o`) |
 
@@ -409,6 +414,22 @@ python3 bsyhc.py -i main.syh -i lib.syh -c -o program.py
 - `--merge concat` — las líneas de los archivos simplemente se unen en orden.
 - `--merge include` — el primer archivo es el punto de entrada; los demás se añaden como con `include`: sus etiquetas reciben el prefijo `archivo.etiqueta` (por ejemplo, `goto lib.start`).
 
+### Compilar a un binario (ELF / EXE)
+
+BSYHC también puede compilar el programa en un archivo binario mediante PyInstaller (`--onefile`):
+
+```
+python3 bsyhc.py -i b.syh -c -elf -o b_bin
+python3 bsyhc.py -i b.syh -c -exe -o b.exe
+```
+
+- `-elf` — un binario ELF (compilado en Linux).
+- `-exe` — un binario EXE (compilado en Windows).
+- Se requiere PyInstaller instalado (`pip install pyinstaller`); el proyecto puede usar su propio entorno `env/`.
+- La compilación ocurre en un directorio temporal: `build/`, `dist/`, `*.spec` y el `.py` intermedio se eliminan automáticamente — solo queda el binario final.
+- PyInstaller no puede compilar de forma cruzada: en Linux `-exe` produce un binario nativo con nombre `*.exe`; un EXE real de Windows solo puede compilarse en Windows.
+- Un binario compilado por BSYHC puede descompilarse de vuelta a `.syh` (ver más abajo).
+
 ### Descompilación
 
 El archivo compilado es fácil de descompilar: el programa se restaura a partir del array:
@@ -418,6 +439,12 @@ python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
 ```
 
 Por defecto se produce un único `.syh` fusionado. Con la bandera `--split`, cada archivo fuente se restaura por separado en el directorio indicado con `-o`.
+
+No solo los archivos `.py`, sino también los binarios compilados pueden descompilarse: BSYHC recupera el array fuente del código incrustado en el binario:
+
+```
+python3 bsyhc.py -i b_bin -d -o b-de.syh
+```
 
 ## 14. Bibliotecas del lenguaje
 

@@ -461,7 +461,10 @@ BSYHC (Base SisYpH Compiler, bsyhc.py) — компилятор языка Sisyp
 Режимы работы:
 
     Компиляция       python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py
+    Компиляция в ELF python3 bsyhc.py -i b.syh -c -elf -o b_bin
+    Компиляция в EXE python3 bsyhc.py -i b.syh -c -exe -o b.exe
     Декомпиляция     python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
+    Декомпиляция бинарника python3 bsyhc.py -i b_bin -d -o b-de.syh
     Интерпретация    python3 bsyhc.py -i b.syh
 
 Если указать только входной файл (без -c и -d), BSYHC просто интерпретирует
@@ -473,7 +476,12 @@ BSYHC (Base SisYpH Compiler, bsyhc.py) — компилятор языка Sisyp
                           нескольких файлов в один выходной
     -o, --output <файл>   выходной файл (по умолчанию: <входной>.py / <входной>.syh)
     -c, --compile         скомпилировать .syh в самодостаточный .py
-    -d, --decompile       декомпилировать скомпилированный .py обратно в .syh
+    -elf                  скомпилировать .syh в бинарный файл ELF через
+                          PyInstaller (Linux)
+    -exe                  скомпилировать .syh в бинарный файл EXE через
+                          PyInstaller (Windows)
+    -d, --decompile       декомпилировать скомпилированный .py (или бинарник
+                          BSYHC) обратно в .syh
     --merge concat|include  способ слияния файлов при компиляции
                           (по умолчанию concat)
     --split               при декомпиляции восстановить каждый исходный файл
@@ -490,6 +498,26 @@ BSYHC (Base SisYpH Compiler, bsyhc.py) — компилятор языка Sisyp
                       при include: их метки получают префикс имя_файла.метка
                       (например, goto lib.start).
 
+Компиляция в бинарный файл (ELF / EXE):
+
+    BSYHC умеет собирать программу в бинарный файл через PyInstaller
+    (--onefile):
+
+        python3 bsyhc.py -i b.syh -c -elf -o b_bin
+        python3 bsyhc.py -i b.syh -c -exe -o b.exe
+
+    -elf    бинарный файл ELF (сборка под Linux).
+    -exe    бинарный файл EXE (сборка под Windows).
+    Требуется установленный PyInstaller (pip install pyinstaller); проект
+    может использовать собственное окружение env/.
+    Сборка идёт во временном каталоге: build/, dist/, *.spec и промежуточный
+    .py удаляются автоматически — остаётся только готовый бинарник.
+    PyInstaller не умеет кросс-компиляцию: на Linux -exe даст нативный
+    бинарник с именем *.exe, а настоящий Windows-EXE собирается только в
+    Windows.
+    Бинарник, собранный BSYHC, можно декомпилировать обратно в .syh
+    (см. ниже).
+
 Декомпиляция:
 
     Скомпилированный файл легко декомпилировать — программа восстанавливается
@@ -499,6 +527,11 @@ BSYHC (Base SisYpH Compiler, bsyhc.py) — компилятор языка Sisyp
 
     По умолчанию получается один объединённый .syh. С флагом --split каждый
     исходный файл восстанавливается отдельно в каталог, указанный через -o.
+
+    Декомпилировать можно не только .py, но и собранный бинарник — BSYHC
+    извлекает исходный массив из кода, встроенного в бинарник:
+
+        python3 bsyhc.py -i b_bin -d -o b-de.syh
 
 --------------------------------------------------------------------------------
 © Sisyph Language. Документация соответствует интерпретатору main.py и

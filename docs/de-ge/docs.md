@@ -382,7 +382,10 @@ Das Programm fragt eine Zeichenkette ab, vergleicht sie mit dem Wort «НИЧЕ�
 | Modus | Befehl |
 |---|---|
 | Kompilieren | `python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py` |
+| In ELF kompilieren | `python3 bsyhc.py -i b.syh -c -elf -o b_bin` |
+| In EXE kompilieren | `python3 bsyhc.py -i b.syh -c -exe -o b.exe` |
 | Dekompilieren | `python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh` |
+| Binärdatei dekompilieren | `python3 bsyhc.py -i b_bin -d -o b-de.syh` |
 | Interpretieren | `python3 bsyhc.py -i b.syh` |
 
 Wenn nur eine Eingabedatei angegeben wird (ohne `-c` und `-d`), interpretiert BSYHC das Programm einfach, genau wie `main.py`.
@@ -394,7 +397,9 @@ Wenn nur eine Eingabedatei angegeben wird (ohne `-c` und `-d`), interpretiert BS
 | `-i, --input <datei>` | Eingabedatei; kann wiederholt werden, um mehrere Dateien in eine Ausgabe zu kompilieren |
 | `-o, --output <datei>` | Ausgabedatei (Standard: `<eingabe>.py` / `<eingabe>.syh`) |
 | `-c, --compile` | `.syh` in eine eigenständige `.py` kompilieren |
-| `-d, --decompile` | eine kompilierte `.py` zurück in `.syh` dekompilieren |
+| `-elf` | `.syh` über PyInstaller in eine ELF-Binärdatei kompilieren (Linux) |
+| `-exe` | `.syh` über PyInstaller in eine EXE-Binärdatei kompilieren (Windows) |
+| `-d, --decompile` | eine kompilierte `.py` (oder BSYHC-Binärdatei) zurück in `.syh` dekompilieren |
 | `--merge concat \| include` | Art der Dateizusammenführung beim Kompilieren (Standard `concat`) |
 | `--split` | beim Dekompilieren jede Quelldatei einzeln wiederherstellen (in das `-o`-Verzeichnis) |
 
@@ -409,6 +414,22 @@ python3 bsyhc.py -i main.syh -i lib.syh -c -o program.py
 - `--merge concat` — die Zeilen der Dateien werden einfach der Reihe nach zusammengefügt.
 - `--merge include` — die erste Datei ist der Einstiegspunkt, die übrigen werden wie bei `include` angehängt: ihre Marken erhalten das Präfix `datei.markierung` (zum Beispiel `goto lib.start`).
 
+### In eine Binärdatei kompilieren (ELF / EXE)
+
+BSYHC kann das Programm auch über PyInstaller (`--onefile`) in eine Binärdatei bauen:
+
+```
+python3 bsyhc.py -i b.syh -c -elf -o b_bin
+python3 bsyhc.py -i b.syh -c -exe -o b.exe
+```
+
+- `-elf` — eine ELF-Binärdatei (Build unter Linux).
+- `-exe` — eine EXE-Binärdatei (Build unter Windows).
+- PyInstaller muss installiert sein (`pip install pyinstaller`); das Projekt kann seine eigene `env/`-Umgebung verwenden.
+- Der Build läuft in einem temporären Verzeichnis: `build/`, `dist/`, `*.spec` und die Zwischen-`.py` werden automatisch entfernt — es bleibt nur die fertige Binärdatei übrig.
+- PyInstaller kann nicht cross-kompilieren: unter Linux erzeugt `-exe` eine native Binärdatei mit dem Namen `*.exe`; eine echte Windows-EXE kann nur unter Windows gebaut werden.
+- Eine von BSYHC gebaute Binärdatei kann zurück in `.syh` dekompiliert werden (siehe unten).
+
 ### Dekompilieren
 
 Die kompilierte Datei lässt sich leicht dekompilieren — das Programm wird aus dem Array wiederhergestellt:
@@ -418,6 +439,12 @@ python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
 ```
 
 Standardmäßig entsteht eine einzige zusammengeführte `.syh`. Mit dem Flag `--split` wird jede Quelldatei einzeln in das über `-o` angegebene Verzeichnis wiederhergestellt.
+
+Nicht nur `.py`-Dateien, sondern auch gebaute Binärdateien lassen sich dekompilieren — BSYHC stellt das Quell-Array aus dem in der Binärdatei eingebetteten Code wieder her:
+
+```
+python3 bsyhc.py -i b_bin -d -o b-de.syh
+```
 
 ## 14. Sprachbibliotheken
 

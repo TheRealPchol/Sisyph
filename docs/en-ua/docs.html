@@ -459,7 +459,10 @@ exit 0</code></pre>
 <table>
   <tr><th>Mode</th><th>Command</th></tr>
   <tr><td>Compile</td><td><code>python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py</code></td></tr>
+  <tr><td>Compile to ELF</td><td><code>python3 bsyhc.py -i b.syh -c -elf -o b_bin</code></td></tr>
+  <tr><td>Compile to EXE</td><td><code>python3 bsyhc.py -i b.syh -c -exe -o b.exe</code></td></tr>
   <tr><td>Decompile</td><td><code>python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh</code></td></tr>
+  <tr><td>Decompile a binary</td><td><code>python3 bsyhc.py -i b_bin -d -o b-de.syh</code></td></tr>
   <tr><td>Interpret</td><td><code>python3 bsyhc.py -i b.syh</code></td></tr>
 </table>
 <p>If only an input file is given (without <code>-c</code> and <code>-d</code>), BSYHC simply interprets the program, just like <code>main.py</code>.</p>
@@ -469,7 +472,9 @@ exit 0</code></pre>
   <tr><td><code>-i, --input &lt;file&gt;</code></td><td>input file; may be repeated to compile several files into one output</td></tr>
   <tr><td><code>-o, --output &lt;file&gt;</code></td><td>output file (default: <code>&lt;input&gt;.py</code> / <code>&lt;input&gt;.syh</code>)</td></tr>
   <tr><td><code>-c, --compile</code></td><td>compile <code>.syh</code> into a self-contained <code>.py</code></td></tr>
-  <tr><td><code>-d, --decompile</code></td><td>decompile a compiled <code>.py</code> back into <code>.syh</code></td></tr>
+  <tr><td><code>-elf</code></td><td>compile <code>.syh</code> into an ELF binary via PyInstaller (Linux)</td></tr>
+  <tr><td><code>-exe</code></td><td>compile <code>.syh</code> into an EXE binary via PyInstaller (Windows)</td></tr>
+  <tr><td><code>-d, --decompile</code></td><td>decompile a compiled <code>.py</code> (or a BSYHC binary) back into <code>.syh</code></td></tr>
   <tr><td><code>--merge concat | include</code></td><td>how to merge files when compiling (default <code>concat</code>)</td></tr>
   <tr><td><code>--split</code></td><td>on decompilation, restore each source file separately (into the <code>-o</code> directory)</td></tr>
 </table>
@@ -480,10 +485,24 @@ exit 0</code></pre>
   <li><code>--merge concat</code> — the lines of the files are simply joined in order.</li>
   <li><code>--merge include</code> — the first file is the entry point, the rest are appended as with <code>include</code>: their labels get the prefix <code>file.label</code> (for example, <code>goto lib.start</code>).</li>
 </ul>
+<h3>Compiling to a binary (ELF / EXE)</h3>
+<p>BSYHC can also build the program into a binary file via PyInstaller (<code>--onefile</code>):</p>
+<pre><code>python3 bsyhc.py -i b.syh -c -elf -o b_bin
+python3 bsyhc.py -i b.syh -c -exe -o b.exe</code></pre>
+<ul>
+  <li><code>-elf</code> — an ELF binary (built on Linux).</li>
+  <li><code>-exe</code> — an EXE binary (built on Windows).</li>
+  <li>PyInstaller must be installed (<code>pip install pyinstaller</code>); the project can use its own <code>env/</code> environment.</li>
+  <li>The build runs in a temporary directory: <code>build/</code>, <code>dist/</code>, <code>*.spec</code> and the intermediate <code>.py</code> are removed automatically — only the final binary remains.</li>
+  <li>PyInstaller cannot cross-compile: on Linux <code>-exe</code> produces a native binary named <code>*.exe</code>; a real Windows EXE can only be built on Windows.</li>
+  <li>A binary built by BSYHC can be decompiled back into <code>.syh</code> (see below).</li>
+</ul>
 <h3>Decompilation</h3>
 <p>The compiled file is easy to decompile — the program is restored from the array:</p>
 <pre><code>python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh</code></pre>
 <p>By default a single merged <code>.syh</code> is produced. With the <code>--split</code> flag every source file is restored separately into the directory given via <code>-o</code>.</p>
+<p>Not only <code>.py</code> files but also built binaries can be decompiled — BSYHC recovers the source array from the code embedded in the binary:</p>
+<pre><code>python3 bsyhc.py -i b_bin -d -o b-de.syh</code></pre>
 
 </main>
 

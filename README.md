@@ -13,7 +13,7 @@ The project ships with **BSYHC** (Base Sisyph Compiler) — a compiler that pack
 - Any Python expression works anywhere: f-strings, comprehensions, `__import__`
 - Comments with `#` (Python comment character)
 - `include` mechanism for reusing code and libraries
-- **BSYHC compiler**: compile to a self-contained `.py`, decompile back, merge multiple files into one
+- **BSYHC compiler**: compile to a self-contained `.py` or a binary (ELF/EXE via PyInstaller), decompile back, merge multiple files into one
 - Standard libraries: `mathlib`, `strlib`, `listlib`, `randlib`, `timelib`
 - Documentation in 5 languages × 3 formats (Markdown, plain text, HTML)
 
@@ -98,8 +98,17 @@ BSYHC (Base Sisyph Compiler) packs a `.syh` file into an array (one line per ele
 # compile
 python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py
 
+# compile to a binary (ELF via PyInstaller, Linux)
+python3 bsyhc.py -i b.syh -c -elf -o b_bin
+
+# compile to a binary (EXE via PyInstaller, Windows)
+python3 bsyhc.py -i b.syh -c -exe -o b.exe
+
 # decompile back to .syh
 python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
+
+# decompile a built binary back to .syh
+python3 bsyhc.py -i b_bin -d -o b-de.syh
 
 # interpret (same as main.py)
 python3 bsyhc.py -i b.syh
@@ -112,7 +121,9 @@ python3 bsyhc.py -i guess.syh -i lib/randlib.syh -i lib/strlib.syh -c --merge in
 python3 guess.py
 ```
 
-Flags: `-i/--input` (repeatable), `-o/--output`, `-c/--compile`, `-d/--decompile`, `--merge concat|include`, `--split` (restore each source file on decompilation).
+Flags: `-i/--input` (repeatable), `-o/--output`, `-c/--compile`, `-d/--decompile`, `-elf` (compile to an ELF binary via PyInstaller on Linux), `-exe` (compile to an EXE binary via PyInstaller on Windows), `--merge concat|include`, `--split` (restore each source file on decompilation).
+
+Binary builds require [PyInstaller](https://pyinstaller.org) (`pip install pyinstaller`; the project's `env/` includes it). The build runs in a temporary directory — `build/`, `dist/`, `*.spec` and the intermediate `.py` are removed automatically, only the final binary remains. PyInstaller cannot cross-compile, so on Linux `-exe` produces a native binary named `*.exe`; a real Windows EXE must be built on Windows. Binaries built by BSYHC can be decompiled back into `.syh` with `-d`.
 
 ## Standard libraries
 

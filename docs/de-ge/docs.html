@@ -459,7 +459,10 @@ exit 0</code></pre>
 <table>
   <tr><th>Modus</th><th>Befehl</th></tr>
   <tr><td>Kompilieren</td><td><code>python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py</code></td></tr>
+  <tr><td>In ELF kompilieren</td><td><code>python3 bsyhc.py -i b.syh -c -elf -o b_bin</code></td></tr>
+  <tr><td>In EXE kompilieren</td><td><code>python3 bsyhc.py -i b.syh -c -exe -o b.exe</code></td></tr>
   <tr><td>Dekompilieren</td><td><code>python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh</code></td></tr>
+  <tr><td>Binärdatei dekompilieren</td><td><code>python3 bsyhc.py -i b_bin -d -o b-de.syh</code></td></tr>
   <tr><td>Interpretieren</td><td><code>python3 bsyhc.py -i b.syh</code></td></tr>
 </table>
 <p>Wenn nur eine Eingabedatei angegeben wird (ohne <code>-c</code> und <code>-d</code>), interpretiert BSYHC das Programm einfach, genau wie <code>main.py</code>.</p>
@@ -469,7 +472,9 @@ exit 0</code></pre>
   <tr><td><code>-i, --input &lt;datei&gt;</code></td><td>Eingabedatei; kann wiederholt werden, um mehrere Dateien in eine Ausgabe zu kompilieren</td></tr>
   <tr><td><code>-o, --output &lt;datei&gt;</code></td><td>Ausgabedatei (Standard: <code>&lt;eingabe&gt;.py</code> / <code>&lt;eingabe&gt;.syh</code>)</td></tr>
   <tr><td><code>-c, --compile</code></td><td><code>.syh</code> in eine eigenständige <code>.py</code> kompilieren</td></tr>
-  <tr><td><code>-d, --decompile</code></td><td>eine kompilierte <code>.py</code> zurück in <code>.syh</code> dekompilieren</td></tr>
+  <tr><td><code>-elf</code></td><td><code>.syh</code> über PyInstaller in eine ELF-Binärdatei kompilieren (Linux)</td></tr>
+  <tr><td><code>-exe</code></td><td><code>.syh</code> über PyInstaller in eine EXE-Binärdatei kompilieren (Windows)</td></tr>
+  <tr><td><code>-d, --decompile</code></td><td>eine kompilierte <code>.py</code> (oder BSYHC-Binärdatei) zurück in <code>.syh</code> dekompilieren</td></tr>
   <tr><td><code>--merge concat | include</code></td><td>Art der Dateizusammenführung beim Kompilieren (Standard <code>concat</code>)</td></tr>
   <tr><td><code>--split</code></td><td>beim Dekompilieren jede Quelldatei einzeln wiederherstellen (in das <code>-o</code>-Verzeichnis)</td></tr>
 </table>
@@ -480,10 +485,24 @@ exit 0</code></pre>
   <li><code>--merge concat</code> — die Zeilen der Dateien werden einfach der Reihe nach zusammengefügt.</li>
   <li><code>--merge include</code> — die erste Datei ist der Einstiegspunkt, die übrigen werden wie bei <code>include</code> angehängt: ihre Marken erhalten das Präfix <code>datei.markierung</code> (zum Beispiel <code>goto lib.start</code>).</li>
 </ul>
+<h3>In eine Binärdatei kompilieren (ELF / EXE)</h3>
+<p>BSYHC kann das Programm auch über PyInstaller (<code>--onefile</code>) in eine Binärdatei bauen:</p>
+<pre><code>python3 bsyhc.py -i b.syh -c -elf -o b_bin
+python3 bsyhc.py -i b.syh -c -exe -o b.exe</code></pre>
+<ul>
+  <li><code>-elf</code> — eine ELF-Binärdatei (Build unter Linux).</li>
+  <li><code>-exe</code> — eine EXE-Binärdatei (Build unter Windows).</li>
+  <li>PyInstaller muss installiert sein (<code>pip install pyinstaller</code>); das Projekt kann seine eigene <code>env/</code>-Umgebung verwenden.</li>
+  <li>Der Build läuft in einem temporären Verzeichnis: <code>build/</code>, <code>dist/</code>, <code>*.spec</code> und die Zwischen-<code>.py</code> werden automatisch entfernt — es bleibt nur die fertige Binärdatei übrig.</li>
+  <li>PyInstaller kann nicht cross-kompilieren: unter Linux erzeugt <code>-exe</code> eine native Binärdatei mit dem Namen <code>*.exe</code>; eine echte Windows-EXE kann nur unter Windows gebaut werden.</li>
+  <li>Eine von BSYHC gebaute Binärdatei kann zurück in <code>.syh</code> dekompiliert werden (siehe unten).</li>
+</ul>
 <h3>Dekompilieren</h3>
 <p>Die kompilierte Datei lässt sich leicht dekompilieren — das Programm wird aus dem Array wiederhergestellt:</p>
 <pre><code>python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh</code></pre>
 <p>Standardmäßig entsteht eine einzige zusammengeführte <code>.syh</code>. Mit dem Flag <code>--split</code> wird jede Quelldatei einzeln in das über <code>-o</code> angegebene Verzeichnis wiederhergestellt.</p>
+<p>Nicht nur <code>.py</code>-Dateien, sondern auch gebaute Binärdateien lassen sich dekompilieren — BSYHC stellt das Quell-Array aus dem in der Binärdatei eingebetteten Code wieder her:</p>
+<pre><code>python3 bsyhc.py -i b_bin -d -o b-de.syh</code></pre>
 
 </main>
 

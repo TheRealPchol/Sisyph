@@ -3,24 +3,33 @@
 # BSYHC - Base SisYpH Compiler
 #
 # Usage:
-#   Compile:      python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py
-#   Decompile:    python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
-#   Interpret:    python3 bsyhc.py -i b.syh
+#   Compile:        python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py
+#   Compile to ELF: python3 bsyhc.py -i b.syh -c -elf -o b_bin
+#   Compile to EXE: python3 bsyhc.py -i b.syh -c -exe -o b.exe
+#   Decompile:      python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
+#   Decompile bin:  python3 bsyhc.py -i b_bin -d -o b-de.syh
+#   Interpret:      python3 bsyhc.py -i b.syh
 #
 # Flags:
 #   -i, --input FILE   input file (may be repeated to compile several files)
 #   -o, --output FILE  output file
 #   -c, --compile      compile .syh into a self-contained .py
-#   -d, --decompile    decompile a compiled .py back into .syh
+#   -elf               compile .syh into a binary (ELF on Linux) via PyInstaller
+#   -exe               compile .syh into a binary (EXE on Windows) via PyInstaller
+#   -d, --decompile    decompile a compiled .py (or BSYHC binary) back into .syh
 #   --merge MODE       how to merge several inputs: concat (default) or include
 #   --split            decompile each source file separately (into -o directory)
 #   -h, --help         show this help
 
 import argparse
 import ast
+import json
 import os
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 
 VERSION = "1.0.0"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -110,13 +119,159 @@ def generate_compiled(interpreter_source: str, source: list, files: list, inputs
     )
 
 
-def compile_files(inputs: list, output: str, mode: str):
+def compile_files(inputs: list, output: str, mode: str, quiet: bool = False):
     interpreter_source = strip_main_block(open(INTERPRETER_FILE, "r", encoding="utf-8").read())
     source, files = merge_sources(inputs, mode)
     compiled = generate_compiled(interpreter_source, source, files, inputs, mode)
     with open(output, "w", encoding="utf-8") as f:
         f.write(compiled)
-    print(f"BSYHC: compiled {len(inputs)} file(s) into '{output}' ({len(source)} lines).")
+    if not quiet:
+        print(f"BSYHC: compiled {len(inputs)} file(s) into '{output}' ({len(source)} lines).")
+
+
+def find_pyinstaller() -> str:
+    candidates = [shutil.which("pyinstaller"), os.path.join(BASE_DIR, "env", "bin", "pyinstaller")]
+    for candidate in candidates:
+        if candidate and os.path.isfile(candidate):
+            return candidate
+    bsyhc_error("PyInstaller not found. Install it with 'pip install pyinstaller' or use the project's env/.")
+
+
+def find_env_python() -> str:
+    candidate = os.path.join(BASE_DIR, "env", "bin", "python")
+    if os.path.isfile(candidate):
+        return candidate
+    return sys.executable
+
+
+def compile_binary(inputs: list, output: str, mode: str, target: str):
+    if target == "elf" and sys.platform == "win32":
+        bsyhc_error("-elf produces an ELF binary, which can only be built on Linux.")
+    if target == "exe" and sys.platform != "win32":
+        print("BSYHC: note: PyInstaller cannot cross-compile; on this platform -exe will produce a "
+              "native binary named like an EXE (a real Windows .exe requires building on Windows).")
+    pyinstaller = find_pyinstaller()
+    workdir = tempfile.mkdtemp(prefix="bsyhc_build_")
+    try:
+        entry_py = os.path.join(workdir, "entry.py")
+        compile_files(inputs, entry_py, mode, quiet=True)
+        out_name = os.path.splitext(os.path.basename(output))[0] or "program"
+        dist_dir = os.path.join(workdir, "dist")
+        cmd = [
+            pyinstaller, "--onefile", "--noconfirm",
+            "--name", out_name,
+            "--distpath", dist_dir,
+            "--workpath", os.path.join(workdir, "build"),
+            "--specpath", workdir,
+            entry_py,
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            bsyhc_error(f"PyInstaller failed:\n{result.stdout}\n{result.stderr}")
+        binary = os.path.join(dist_dir, out_name)
+        if not os.path.isfile(binary):
+            bsyhc_error(f"PyInstaller finished but the binary '{binary}' was not produced.")
+        shutil.copy2(binary, output)
+        if sys.platform != "win32":
+            os.chmod(output, 0o755)
+        print(f"BSYHC: compiled {len(inputs)} file(s) into binary '{output}' "
+              f"({target.upper()}, via PyInstaller).")
+    finally:
+        shutil.rmtree(workdir, ignore_errors=True)
+
+
+BINARY_EXTRACT_HELPER = r"""
+import json
+import marshal
+import sys
+
+try:
+    from PyInstaller.archive.readers import CArchiveReader, PKG_ITEM_PYSOURCE
+except ImportError:
+    from PyInstaller.archive import CArchiveReader, PKG_ITEM_PYSOURCE
+
+
+def collect_consts(obj, depth, strings, files):
+    if depth > 10 or not hasattr(obj, "co_consts"):
+        return
+    for const in obj.co_consts:
+        if isinstance(const, tuple):
+            if const and all(isinstance(x, str) for x in const):
+                strings.append(const)
+            elif const and all(
+                    isinstance(x, tuple) and len(x) == 3
+                    and isinstance(x[0], str) and isinstance(x[1], int) and isinstance(x[2], int)
+                    for x in const):
+                files.append(const)
+        elif isinstance(const, type(obj)):
+            collect_consts(const, depth + 1, strings, files)
+
+
+def main():
+    binary = sys.argv[1]
+    try:
+        reader = CArchiveReader(binary)
+    except Exception as e:
+        sys.exit(f"not a PyInstaller binary: {e}")
+    strings, files = [], []
+    for name, entry in reader.toc.items():
+        if entry[4] != PKG_ITEM_PYSOURCE:
+            continue
+        try:
+            obj = marshal.loads(reader.extract(name))
+        except Exception:
+            continue
+        if hasattr(obj, "co_consts"):
+            collect_consts(obj, 0, strings, files)
+    if not strings:
+        sys.exit("no SOURCE array found; the binary was not produced by BSYHC")
+    source = max(strings, key=len)
+    result = {"source": list(source)}
+    if files:
+        result["files"] = [[n, s, e] for n, s, e in files[0]]
+    print(json.dumps(result))
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception as e:
+        sys.exit(f"cannot read the binary: {e}")
+"""
+
+
+def is_binary_file(path: str) -> bool:
+    with open(path, "rb") as f:
+        head = f.read(4)
+    return head.startswith(b"\x7fELF") or head.startswith(b"MZ")
+
+
+def decompile_binary(input_path: str, output: str, split: bool):
+    helper = [find_env_python(), "-c", BINARY_EXTRACT_HELPER, input_path]
+    result = subprocess.run(helper, capture_output=True, text=True)
+    if result.returncode != 0:
+        bsyhc_error(f"cannot decompile binary: {result.stdout.strip()} {result.stderr.strip()}".strip())
+    try:
+        data = json.loads(result.stdout)
+    except json.JSONDecodeError as e:
+        bsyhc_error(f"cannot parse extraction result: {e}")
+    source = data["source"]
+    files = [tuple(f) for f in data.get("files", [])]
+    if not files:
+        files = [(os.path.basename(input_path), 0, len(source))]
+    if not split:
+        with open(output, "w", encoding="utf-8") as f:
+            f.write("\n".join(source) + "\n")
+        print(f"BSYHC: decompiled binary '{input_path}' into '{output}' ({len(source)} lines).")
+        return
+    for name, start, end in files:
+        path = os.path.join(output, name) if output else name
+        os.makedirs(os.path.dirname(path), exist_ok=True) if os.path.dirname(path) else None
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("\n".join(source[start:end]) + "\n")
+        print(f"BSYHC: restored '{path}' ({end - start} lines).")
 
 
 def extract_array(source_text: str, name: str) -> list:
@@ -189,16 +344,24 @@ def build_parser() -> argparse.ArgumentParser:
         description="BSYHC - Base SisYpH Compiler: compile, decompile and interpret Sisyph (.syh) programs.",
         epilog="Examples:\n"
                "  python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py\n"
+               "  python3 bsyhc.py -i b.syh -c -elf -o b_bin\n"
+               "  python3 bsyhc.py -i b.syh -c -exe -o b.exe\n"
                "  python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh\n"
+               "  python3 bsyhc.py -i b_bin -d -o b-de.syh\n"
                "  python3 bsyhc.py -i b.syh",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("-i", "--input", action="append", metavar="FILE", required=True,
                         help="input file (repeat to compile several files into one output)")
-    parser.add_argument("-o", "--output", metavar="FILE", help="output file (default: <input>.py / <input>.syh)")
+    parser.add_argument("-o", "--output", metavar="FILE", help="output file (default: <input>.py / <input>.syh / <input>.elf / <input>.exe)")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("-c", "--compile", action="store_true", help="compile .syh into a self-contained .py")
-    mode.add_argument("-d", "--decompile", action="store_true", help="decompile a compiled .py back into .syh")
+    mode.add_argument("-d", "--decompile", action="store_true", help="decompile a compiled .py (or BSYHC binary) back into .syh")
+    target = parser.add_mutually_exclusive_group()
+    target.add_argument("-elf", "--elf", dest="elf", action="store_true",
+                        help="with -c: compile into a native ELF binary via PyInstaller (Linux)")
+    target.add_argument("-exe", "--exe", dest="exe", action="store_true",
+                        help="with -c: compile into an EXE binary via PyInstaller (Windows)")
     parser.add_argument("--merge", choices=["concat", "include"], default="concat",
                         help="how to merge several inputs: concat (default) or include (labels of extra files get 'name.' prefix)")
     parser.add_argument("--split", action="store_true",
@@ -210,7 +373,15 @@ def build_parser() -> argparse.ArgumentParser:
 def main():
     args = build_parser().parse_args()
 
-    if args.compile:
+    if args.elf or args.exe:
+        if not args.compile:
+            bsyhc_error("-elf / -exe are only valid together with -c (compile).")
+        if args.split:
+            bsyhc_error("--split is only valid with -d (decompile).")
+        target = "elf" if args.elf else "exe"
+        output = args.output or os.path.splitext(args.input[0])[0] + ("." + target)
+        compile_binary(args.input, output, args.merge, target)
+    elif args.compile:
         if args.split:
             bsyhc_error("--split is only valid with -d (decompile).")
         output = args.output or os.path.splitext(args.input[0])[0] + ".py"
@@ -222,7 +393,10 @@ def main():
             output = args.output or "."
         else:
             output = args.output or os.path.splitext(args.input[0])[0] + ".syh"
-        decompile_file(args.input[0], output, args.split)
+        if is_binary_file(args.input[0]):
+            decompile_binary(args.input[0], output, args.split)
+        else:
+            decompile_file(args.input[0], output, args.split)
     else:
         if len(args.input) != 1:
             bsyhc_error("interpret mode accepts exactly one input file. Use -c to compile several files.")
