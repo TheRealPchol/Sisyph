@@ -1,0 +1,57 @@
+# listlib.syh — утилиты для списков (числовые)
+# Подключение: include listlib
+# Вызов подпрограммы: goto listlib.<имя> (возврат через goto back)
+# Входные переменные: ll_list, ll_item, ll_n
+# Результат всегда записывается в: ll_result
+# Примечание: подпрограммы не изменяют исходный список — они возвращают новый.
+include v
+
+@length
+# ll_list (список) -> ll_result (целое) | количество элементов
+v.int ll_result len(ll_list)
+goto back
+
+@sum
+# ll_list (числовой список) -> ll_result (число) | сумма элементов
+v.int ll_result sum(ll_list)
+goto back
+
+@min
+# ll_list (числовой список) -> ll_result (число) | минимальный элемент
+v.int ll_result min(ll_list)
+goto back
+
+@max
+# ll_list (числовой список) -> ll_result (число) | максимальный элемент
+v.int ll_result max(ll_list)
+goto back
+
+@sort
+# ll_list (числовой список) -> ll_result (список) | отсортированный по возрастанию
+v.list ll_result sorted(ll_list)
+goto back
+
+@reverse
+# ll_list (список) -> ll_result (список) | в обратном порядке
+v.list ll_result ll_list[::-1]
+goto back
+
+@unique
+# ll_list (список) -> ll_result (список) | без повторяющихся элементов (по возрастанию)
+v.list ll_result sorted(set(ll_list))
+goto back
+
+@contains
+# ll_item (значение), ll_list (список) -> ll_result (True | False) | есть ли элемент
+v.bool ll_result ll_item in ll_list
+goto back
+
+@append
+# ll_list (список), ll_item (значение) -> ll_result (список) | с добавленным элементом
+v.list ll_result ll_list + [ll_item]
+goto back
+
+@range_n
+# ll_n (целое) -> ll_result (список) | числа от 0 до n-1
+v.list ll_result list(range(int(ll_n)))
+goto back

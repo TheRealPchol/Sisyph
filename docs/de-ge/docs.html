@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sisyph — Dokumentation</title>
+<style>
+  :root {
+    --bg: #f5f4f1;
+    --panel: #ffffff;
+    --ink: #1f2328;
+    --muted: #6a6f78;
+    --accent: #8a5a2b;
+    --accent-soft: #efe6da;
+    --code-bg: #1f2328;
+    --code-ink: #e8e6e3;
+    --line: #dcd8d1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 20px 64px; }
+  header.hero {
+    background: var(--ink);
+    color: #f5f4f1;
+    border-radius: 14px;
+    padding: 36px 40px;
+    margin-bottom: 28px;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 34px; }
+  header.hero p { margin: 0; color: #c9c4bb; }
+  header.hero .badge {
+    display: inline-block;
+    margin-top: 14px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 999px;
+  }
+  nav.toc {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 28px;
+    margin-bottom: 28px;
+  }
+  nav.toc h2 { margin: 0 0 10px; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  nav.toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 40px; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  main { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 32px 40px; }
+  h2 {
+    font-size: 22px;
+    margin: 40px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent-soft);
+  }
+  h2:first-child { margin-top: 0; }
+  h3 { font-size: 17px; margin: 26px 0 10px; color: var(--accent); }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0; padding-left: 24px; }
+  li { margin: 4px 0; }
+  code {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.88em;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border-radius: 10px;
+    padding: 18px 22px;
+    overflow-x: auto;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14.5px; }
+  th, td { border: 1px solid var(--line); padding: 9px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  tr:nth-child(even) td { background: #faf9f7; }
+  blockquote {
+    margin: 14px 0;
+    padding: 12px 18px;
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 10px 10px 0;
+  }
+  blockquote p { margin: 4px 0; }
+  footer {
+    margin-top: 28px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  @media (max-width: 640px) {
+    nav.toc ol { columns: 1; }
+    main { padding: 22px 18px; }
+    header.hero { padding: 26px 22px; }
+    header.hero h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="badge">Sisyph Language</span>
+  <h1>Dokumentation</h1>
+  <p>Eine imperative, zeilenorientierte Programmiersprache. Interpreter — <code>main.py</code>.</p>
+</header>
+
+<nav class="toc">
+  <h2>Inhaltsverzeichnis</h2>
+  <ol>
+    <li><a href="#about">Über die Sprache</a></li>
+    <li><a href="#run">Programme ausführen</a></li>
+    <li><a href="#syntax">Syntax</a></li>
+    <li><a href="#control">Steuerbefehle</a></li>
+    <li><a href="#stdlib">Die Bibliothek stdlib</a></li>
+    <li><a href="#v">Die Bibliothek v</a></li>
+    <li><a href="#file">Die Bibliothek file</a></li>
+    <li><a href="#pylib">Die Bibliothek pylib</a></li>
+    <li><a href="#examples">Beispielprogramme</a></li>
+    <li><a href="#limits">Einschränkungen und Besonderheiten</a></li>
+    <li><a href="#errors">Fehlermeldungen</a></li>
+    <li><a href="#ecosystem">Ökosystem</a></li>
+    <li><a href="#bsyhc">BSYHC — Der Compiler</a></li>
+    <li><a href="#libs">Sprachbibliotheken</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<h2 id="about">1. Über die Sprache</h2>
+<p><strong>Sisyph</strong> ist eine imperative, zeilenorientierte Programmiersprache. Ein Programm ist eine Folge von Befehlszeilen, die von einem in Python geschriebenen Interpreter (<code>main.py</code>) Zeile für Zeile ausgeführt werden.</p>
+<p>Das wesentliche Merkmal: Sisyph erfindet keine eigene Arithmetik oder Logik — jeder Ausdruck und jeder Variablenwert ist ein Python-Ausdruck. Die Sprache übernimmt die Struktur des Programms (Marken, Sprünge, Unterprogramme), während alle Berechnungen an den Python-Interpreter delegiert werden.</p>
+<table>
+  <tr><th>Eigenschaft</th><th>Wert</th></tr>
+  <tr><td>Name</td><td>Sisyph</td></tr>
+  <tr><td>Dateiendung</td><td><code>.syh</code></td></tr>
+  <tr><td>Paradigma</td><td>imperativ, zeilenorientiert</td></tr>
+  <tr><td>Interpreter</td><td><code>main.py</code> (Python 3)</td></tr>
+  <tr><td>Ausdrücke</td><td>Python (<code>eval</code> / <code>exec</code>)</td></tr>
+  <tr><td>Typsystem</td><td>dynamisch (Python-Typen)</td></tr>
+  <tr><td>Gültigkeitsbereich</td><td>global (ein einziger Python-Namensraum)</td></tr>
+</table>
+
+<h2 id="run">2. Programme ausführen</h2>
+<p>Ein Programm wird mit folgendem Befehl ausgeführt:</p>
+<pre><code>python3 main.py programm.syh</code></pre>
+<p>Beispiel:</p>
+<pre><code>python3 main.py a.syh</code></pre>
+<p>Wenn die Datei nicht gefunden wird, gibt der Interpreter eine Fehlermeldung aus und beendet sich.</p>
+<p>Ein Programm kann auch über den BSYHC-Compiler im Interpretationsmodus gestartet werden (siehe <a href="#bsyhc">Abschnitt 13</a>):</p>
+<pre><code>python3 bsyhc.py -i programm.syh</code></pre>
+
+<h2 id="syntax">3. Syntax</h2>
+<p>Ein Programm besteht aus Zeilen. Jede Zeile enthält genau einen Befehl. Leere Zeilen werden ignoriert.</p>
+<h3>Befehlstrenner</h3>
+<p>Mehrere Befehle können in einer Zeile durch Semikolons getrennt werden:</p>
+<pre><code>goto check; goto back</code></pre>
+<h3>Marken</h3>
+<p>Eine Marke ist der Name einer Zeile, zu der man springen kann. Eine Marke beginnt mit dem Zeichen <code>@</code> und belegt eine eigene Zeile:</p>
+<pre><code>@main
+stdlib.stdout "Hallo!"</code></pre>
+<p>Zeilen mit Marken werden bei der Ausführung übersprungen.</p>
+<h3>Kommentare</h3>
+<p>Die Sprache hat keine eigene Kommentarsyntax. Da Ausdrücke von Python verarbeitet werden, kann innerhalb von Ausdrücken das Python-Kommentarzeichen <code>#</code> verwendet werden.</p>
+<h3>Groß-/Kleinschreibung</h3>
+<p>Befehle unterscheiden Groß- und Kleinschreibung: <code>goto</code> ist ein Befehl, <code>GOTO</code> nicht.</p>
+<h3>Variablen</h3>
+<p>Variablen werden implizit durch die Befehle <code>v.*</code>, <code>stdlib.stdin</code>, <code>file.*</code> und <code>pylib.*</code> erzeugt. Eine explizite Deklaration ist nicht nötig. Variablennamen sind gewöhnliche Python-Namen.</p>
+
+<h2 id="control">4. Steuerbefehle</h2>
+<h3>include</h3>
+<p>Lädt eine Bibliotheksdatei oder eine eingebaute Bibliothek:</p>
+<pre><code>include name</code></pre>
+<p>Wenn die Datei <code>name.syh</code> existiert, werden ihre Zeilen an das Ende des aktuellen Programms angehängt und die Marken der Datei sind mit dem Präfix <code>name.markierung</code> verfügbar:</p>
+<pre><code>include lib
+goto lib.start</code></pre>
+<p>Wenn die Datei nicht existiert, gilt <code>name</code> als eingebaute Bibliothek. Eingebaute Bibliotheken: <code>stdlib</code>, <code>v</code>, <code>file</code>, <code>pylib</code>.</p>
+<h3>goto</h3>
+<p>Unbedingter Sprung zu einer Marke:</p>
+<pre><code>goto markierung</code></pre>
+<p>Die Sprungposition wird auf dem Aufrufstapel gespeichert, sodass man später zurückkehren kann.</p>
+<h3>goto back</h3>
+<p>Rückkehr aus einem Unterprogramm:</p>
+<pre><code>goto back</code></pre>
+<p>Holt die Position des letzten Sprungs vom Aufrufstapel und setzt die Ausführung dort fort. Ist der Stapel leer, wird eine Fehlermeldung ausgegeben.</p>
+<p>Beispiel für ein Unterprogramm:</p>
+<pre><code>@main
+goto work
+exit 0
+
+@work
+stdlib.stdout "arbeite..."
+goto back</code></pre>
+<h3>exit</h3>
+<p>Beendet das Programm:</p>
+<pre><code>exit
+exit 0
+exit 5</code></pre>
+<ul>
+  <li><code>exit</code> / <code>exit 0</code> — erfolgreiche Beendigung, gibt <code>The program has completed successfully.</code> aus</li>
+  <li><code>exit &lt;code&gt;</code> — Beendigung mit einem Code, gibt <code>The program terminated with code "&lt;code&gt;".</code> aus</li>
+</ul>
+<h3>if</h3>
+<p>Bedingte Ausführung in einer Zeile:</p>
+<pre><code>if &lt;ausdruck&gt; then &lt;befehl&gt;</code></pre>
+<p>Wenn der Ausdruck wahr ist (wird in Python zu <code>bool</code> konvertiert), wird der Befehl nach <code>then</code> ausgeführt. Ein <code>else</code> gibt es nicht.</p>
+<p>Beispiel:</p>
+<pre><code>if x > 10 then goto big
+if x <= 10 then goto small</code></pre>
+
+<h2 id="stdlib">5. Die Bibliothek stdlib</h2>
+<p>Für die Verwendung: <code>include stdlib</code> hinzufügen.</p>
+<h3>stdlib.stdout</h3>
+<p>Gibt den Wert eines Ausdrucks aus:</p>
+<pre><code>stdlib.stdout &lt;ausdruck&gt;</code></pre>
+<p>Der Ausdruck wird von Python ausgewertet; f-Strings werden unterstützt:</p>
+<pre><code>stdlib.stdout f"Wert: {x}"</code></pre>
+<h3>stdlib.stdin</h3>
+<p>Liest eine Zeichenkette von der Tastatur:</p>
+<pre><code>stdlib.stdin &lt;variable&gt; &lt;aufforderung&gt;</code></pre>
+<p>Das Ergebnis wird in der Variable gespeichert. Die Aufforderung kann eine Zeichenkette oder ein Ausdruck sein:</p>
+<pre><code>stdlib.stdin name "Wie heißt du? "</code></pre>
+<p>Lesen ohne Speichern:</p>
+<pre><code>stdlib.stdin &lt;aufforderung&gt;</code></pre>
+
+<h2 id="v">6. Die Bibliothek v</h2>
+<p>Für die Verwendung: <code>include v</code> hinzufügen.</p>
+<p>Die Bibliothek konvertiert den Wert eines Ausdrucks in den angegebenen Typ und speichert ihn in einer Variable:</p>
+<table>
+  <tr><th>Befehl</th><th>Typ</th></tr>
+  <tr><td><code>v.int</code></td><td>Ganzzahl (<code>int</code>)</td></tr>
+  <tr><td><code>v.str</code></td><td>Zeichenkette (<code>str</code>)</td></tr>
+  <tr><td><code>v.float</code></td><td>Gleitkommazahl (<code>float</code>)</td></tr>
+  <tr><td><code>v.bool</code></td><td>Wahrheitswert (<code>bool</code>)</td></tr>
+  <tr><td><code>v.list</code></td><td>Liste (<code>list</code>)</td></tr>
+</table>
+<p>Syntax:</p>
+<pre><code>v.int x "42"
+v.list l [1, 2, 3]
+v.str s l[0]</code></pre>
+
+<h2 id="file">7. Die Bibliothek file</h2>
+<p>Für die Verwendung: <code>include file</code> hinzufügen.</p>
+<table>
+  <tr><th>Befehl</th><th>Zweck</th></tr>
+  <tr><td><code>file.read &lt;variable&gt; &lt;pfad&gt;</code></td><td>liest die gesamte Datei in eine Variable</td></tr>
+  <tr><td><code>file.write &lt;pfad&gt; &lt;ausdruck&gt;</code></td><td>schreibt den Ausdruck in eine Datei (überschreibt)</td></tr>
+  <tr><td><code>file.append &lt;pfad&gt; &lt;ausdruck&gt;</code></td><td>hängt den Ausdruck an das Ende einer Datei an</td></tr>
+  <tr><td><code>file.delete &lt;pfad&gt;</code></td><td>löscht eine Datei</td></tr>
+  <tr><td><code>file.exists &lt;variable&gt; &lt;pfad&gt;</code></td><td>speichert <code>True</code>/<code>False</code> darüber, ob die Datei existiert</td></tr>
+  <tr><td><code>file.lines &lt;variable&gt; &lt;pfad&gt;</code></td><td>speichert die Liste der Zeilen der Datei</td></tr>
+</table>
+<p>Beispiel:</p>
+<pre><code>file.write "data.txt" f"Zeile: {x}\n"
+file.read content "data.txt"
+file.exists ok "data.txt"</code></pre>
+<p>Wenn eine Datei nicht gelesen oder gelöscht werden kann, wird <code>Sisyph File Error</code> mit dem Text der Ausnahme ausgegeben und die Variable erhält einen Standardwert (<code>""</code> oder <code>[]</code>).</p>
+
+<h2 id="pylib">8. Die Bibliothek pylib</h2>
+<p>Für die Verwendung: <code>include pylib</code> hinzufügen.</p>
+<p>Die Bibliothek gewährt direkten Zugriff auf Python.</p>
+<table>
+  <tr><th>Befehl</th><th>Zweck</th></tr>
+  <tr><td><code>pylib.exec &lt;code&gt;</code></td><td>führt beliebigen Python-Code aus</td></tr>
+  <tr><td><code>pylib.eval &lt;variable&gt; &lt;ausdruck&gt;</code></td><td>wertet einen Ausdruck aus und speichert das Ergebnis</td></tr>
+  <tr><td><code>pylib.import &lt;modul&gt;</code></td><td>importiert ein Python-Modul</td></tr>
+  <tr><td><code>pylib.importas &lt;modul&gt; &lt;alias&gt;</code></td><td>importiert ein Modul mit einem Alias</td></tr>
+  <tr><td><code>pylib.from &lt;code&gt;</code></td><td>führt <code>from &lt;code&gt;</code> aus</td></tr>
+  <tr><td><code>pylib.get &lt;variable&gt; &lt;python-variable&gt;</code></td><td>kopiert den Wert einer Python-Variable</td></tr>
+  <tr><td><code>pylib.set &lt;python-variable&gt; &lt;ausdruck&gt;</code></td><td>weist einer Python-Variable einen Wert zu</td></tr>
+  <tr><td><code>pylib.print &lt;ausdruck&gt;</code></td><td>wertet einen Ausdruck aus und gibt das Ergebnis aus</td></tr>
+</table>
+<p>Beispiel:</p>
+<pre><code>pylib.importas math m
+pylib.set x m.sqrt(16)
+pylib.print x</code></pre>
+
+<h2 id="examples">9. Beispielprogramme</h2>
+<h3>Beispiel 1. Listen und Typkonvertierung (<code>a.syh</code>)</h3>
+<pre><code>include v
+include stdlib
+
+v.list l ["po", 14, 17.3, True, ["object"]]
+v.str q l[0]
+v.str w l[1]
+v.str e l[2]
+v.str r l[3]
+v.str t l[4]
+v.str u l[4][0]
+stdlib.stdout f"{q}\n{w}\n{e}\n{r}\n{t}\n{u}\n"
+exit 0</code></pre>
+<p>Ausgabe:</p>
+<pre><code>po
+14
+17.3
+True
+["object"]
+object</code></pre>
+<h3>Beispiel 2. Eingabe, Sprünge und Unterprogramme (<code>b.syh</code>)</h3>
+<pre><code>include v
+include stdlib
+
+v.str false_o "Ты не угадал("
+v.str true_o "Ты угадал!"
+
+@main
+stdlib.stdin sa "Введите строку: "
+v.str object "НИЧЕГО"
+goto check
+exit 0
+
+@check
+if sa == object then goto true
+if sa != object then goto false
+goto back
+
+@true
+stdlib.stdout true_o
+goto back
+
+@false
+stdlib.stdout false_o, "\n"
+goto main</code></pre>
+<p>Das Programm fragt eine Zeichenkette ab, vergleicht sie mit dem Wort «НИЧЕГО» und gibt das Ergebnis aus. Die Unterprogramme <code>@true</code> und <code>@false</code> kehren über <code>goto back</code> zurück.</p>
+
+<h2 id="limits">10. Einschränkungen und Besonderheiten</h2>
+<ul>
+  <li><strong>Keine Schleifen.</strong> Wiederholungen werden ausschließlich über <code>goto</code> organisiert.</li>
+  <li><strong>Keine Funktionen.</strong> Marken mit <code>goto</code> / <code>goto back</code> dienen als Unterprogramme.</li>
+  <li><strong>Keine lokalen Variablen.</strong> Alles lebt im globalen Python-Namensraum.</li>
+  <li><strong>Kein <code>else</code>.</strong> Verzweigungen sind nur mit <code>if ... then</code> möglich.</li>
+  <li><strong><code>if</code> in einer Zeile.</strong> Der Befehl nach <code>then</code> ist ein einzelner, kann aber <code>;</code> enthalten.</li>
+  <li><strong>Parsen nach Leerzeichen und Punkten.</strong> Argumente mit Leerzeichen (zum Beispiel Dateipfade) werden unsicher geparst: <code>file.write "my file.txt" x</code> funktioniert nicht.</li>
+  <li><strong>Gemeinsamer Aufrufstapel.</strong> Rekursive Sprünge sind erlaubt, aber nicht begrenzt.</li>
+  <li><strong>Ausdrücke sind Python.</strong> Jeder Fehler in einem Ausdruck ist ein Python-Fehler, kein Sisyph-Fehler.</li>
+  <li><strong><code>include</code> fügt Code ein.</strong> Die eingebundene Datei wird an das aktuelle Programm angehängt und beim Erreichen ausgeführt.</li>
+</ul>
+
+<h2 id="errors">11. Fehlermeldungen</h2>
+<table>
+  <tr><th>Meldung</th><th>Situation</th></tr>
+  <tr><td><code>Sisyph Error: File '&lt;name&gt;' not found.</code></td><td>die Programmdatei wurde nicht gefunden</td></tr>
+  <tr><td><code>Sisyph Error: Unknown label '&lt;markierung&gt;'</code></td><td>Sprung zu einer nicht existierenden Marke</td></tr>
+  <tr><td><code>Sisyph Error: Call stack is empty, nowhere to return</code></td><td><code>goto back</code> bei leerem Stapel</td></tr>
+  <tr><td><code>Sisyph File Error: &lt;ausnahme&gt;</code></td><td>Fehler bei Dateioperationen</td></tr>
+  <tr><td><code>Sisyph PyLib Error: &lt;typ&gt;: &lt;meldung&gt;</code></td><td>Python-Fehler in der Bibliothek pylib</td></tr>
+  <tr><td><code>The program has completed successfully.</code></td><td>erfolgreiche Beendigung (<code>exit 0</code>)</td></tr>
+  <tr><td><code>The program terminated with code "&lt;code&gt;"</code></td><td>Beendigung mit einem Code</td></tr>
+</table>
+
+<h2 id="ecosystem">12. Ökosystem</h2>
+<ul>
+  <li><strong><code>.syh</code>-Dateien</strong> — Programme und Bibliotheken.</li>
+  <li><strong><code>include</code></strong> — der Wiederverwendungsmechanismus: Marken fremder Dateien werden mit dem Präfix des Dateinamens aufgerufen (<code>name.markierung</code>).</li>
+  <li><strong>Eingebaute Bibliotheken</strong> — <code>stdlib</code> (Ein-/Ausgabe), <code>v</code> (Typen), <code>file</code> (Dateien), <code>pylib</code> (Python).</li>
+  <li><strong><code>pylib</code></strong> — der Erweiterungspunkt: beliebiger Python-Code ist aus Sisyph erreichbar, ohne den Interpreter zu ändern.</li>
+  <li><strong>BSYHC</strong> — der Compiler: <code>bsyhc.py</code> verpackt <code>.syh</code> in eine eigenständige <code>.py</code>, kann Dekompilieren und Mehrfachdatei-Builds (siehe <a href="#bsyhc">Abschnitt 13</a>).</li>
+  <li><strong>Sprachbibliotheken</strong> — <code>mathlib</code>, <code>strlib</code>, <code>listlib</code>, <code>randlib</code>, <code>timelib</code>: Unterprogramme für Mathematik, Zeichenketten, Listen, Zufall und Zeit (siehe <a href="#libs">Abschnitt 14</a>).</li>
+</ul>
+
+<h2 id="libs">14. Sprachbibliotheken</h2>
+<p>Die Sprache wird mit Unterprogramm-Bibliotheken ausgeliefert — gewöhnliche <code>.syh</code>-Dateien, die mit <code>include</code> geladen und über <code>goto &lt;bibliothek&gt;.&lt;unterprogramm&gt;</code> aufgerufen werden. Die Dateien liegen im Verzeichnis <code>lib/</code> und werden ohne Pfad eingebunden.</p>
+<h3>Konventionen</h3>
+<ul>
+  <li>Eine Datei wird mit <code>include &lt;name&gt;</code> geladen, ein Unterprogramm wird mit <code>goto &lt;name&gt;.&lt;unterprogramm&gt;</code> aufgerufen und kehrt mit <code>goto back</code> zurück.</li>
+  <li>Ein Unterprogramm liest seine Eingabevariablen (jede Bibliothek hat ihr eigenes Präfix) und schreibt das Ergebnis in die Variable <code>&lt;präfix&gt;_result</code>.</li>
+  <li>Daten werden über globale Variablen übergeben, daher müssen sie vor jedem Aufruf neu gesetzt werden.</li>
+  <li>In Unterprogrammen gibt es keine Schleifen: jedes <code>goto</code> legt eine Position auf den Aufrufstapel, eine Schleife im Unterprogramm würde den Stapel also verschmutzen. Wiederholungen werden im Hauptprogramm organisiert.</li>
+  <li>Der BSYHC-Compiler kann Bibliotheken direkt in die kompilierte Datei einbetten — siehe Abschnitt 13, Flag <code>--merge include</code>.</li>
+</ul>
+<h3>Beispiel</h3>
+<pre><code>include v
+include stdlib
+include mathlib
+
+v.int ml_x 5
+goto mathlib.factorial
+stdlib.stdout f"5! = {ml_result}\n"
+exit 0</code></pre>
+<h3>lib/mathlib.syh — Mathematik (Präfix <code>ml_</code>)</h3>
+<table>
+  <tr><th>Unterprogramm</th><th>Eingabe</th><th>Ausgabe</th><th>Beschreibung</th></tr>
+  <tr><td><code>mathlib.abs</code></td><td><code>ml_x</code></td><td><code>ml_result</code></td><td>Betrag</td></tr>
+  <tr><td><code>mathlib.sign</code></td><td><code>ml_x</code></td><td><code>ml_result</code></td><td>Vorzeichen: −1, 0 oder 1</td></tr>
+  <tr><td><code>mathlib.min2</code></td><td><code>ml_a</code>, <code>ml_b</code></td><td><code>ml_result</code></td><td>die kleinere von zwei Zahlen</td></tr>
+  <tr><td><code>mathlib.max2</code></td><td><code>ml_a</code>, <code>ml_b</code></td><td><code>ml_result</code></td><td>die größere von zwei Zahlen</td></tr>
+  <tr><td><code>mathlib.clamp</code></td><td><code>ml_x</code>, <code>ml_lo</code>, <code>ml_hi</code></td><td><code>ml_result</code></td><td>Wert auf Grenzen begrenzt</td></tr>
+  <tr><td><code>mathlib.pow</code></td><td><code>ml_a</code>, <code>ml_b</code></td><td><code>ml_result</code></td><td><code>a</code> hoch <code>b</code></td></tr>
+  <tr><td><code>mathlib.is_even</code></td><td><code>ml_x</code></td><td><code>ml_result</code></td><td>ob die Zahl gerade ist</td></tr>
+  <tr><td><code>mathlib.is_odd</code></td><td><code>ml_x</code></td><td><code>ml_result</code></td><td>ob die Zahl ungerade ist</td></tr>
+  <tr><td><code>mathlib.factorial</code></td><td><code>ml_x</code></td><td><code>ml_result</code></td><td>Fakultät der Zahl</td></tr>
+  <tr><td><code>mathlib.gcd</code></td><td><code>ml_a</code>, <code>ml_b</code></td><td><code>ml_result</code></td><td>größter gemeinsamer Teiler</td></tr>
+</table>
+<h3>lib/strlib.syh — Zeichenketten (Präfix <code>sl_</code>)</h3>
+<table>
+  <tr><th>Unterprogramm</th><th>Eingabe</th><th>Ausgabe</th><th>Beschreibung</th></tr>
+  <tr><td><code>strlib.upper</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>Zeichenkette in Großbuchstaben</td></tr>
+  <tr><td><code>strlib.lower</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>Zeichenkette in Kleinbuchstaben</td></tr>
+  <tr><td><code>strlib.capitalize</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>Zeichenkette mit großem Anfangsbuchstaben</td></tr>
+  <tr><td><code>strlib.length</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>Länge der Zeichenkette</td></tr>
+  <tr><td><code>strlib.strip</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>ohne Randleerzeichen</td></tr>
+  <tr><td><code>strlib.reverse</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>umgekehrte Zeichenkette</td></tr>
+  <tr><td><code>strlib.contains</code></td><td><code>sl_sub</code>, <code>sl_text</code></td><td><code>sl_result</code></td><td>ob die Teilzeichenkette enthalten ist</td></tr>
+  <tr><td><code>strlib.replace</code></td><td><code>sl_text</code>, <code>sl_old</code>, <code>sl_new</code></td><td><code>sl_result</code></td><td>Teilzeichenkette ersetzen</td></tr>
+  <tr><td><code>strlib.split</code></td><td><code>sl_text</code>, <code>sl_sep</code></td><td><code>sl_result</code></td><td>in eine Liste zerlegen</td></tr>
+  <tr><td><code>strlib.join</code></td><td><code>sl_list</code>, <code>sl_sep</code></td><td><code>sl_result</code></td><td>Liste zu einer Zeichenkette verbinden</td></tr>
+  <tr><td><code>strlib.is_digit</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>nur aus Ziffern?</td></tr>
+</table>
+<h3>lib/listlib.syh — Listen (Präfix <code>ll_</code>)</h3>
+<table>
+  <tr><th>Unterprogramm</th><th>Eingabe</th><th>Ausgabe</th><th>Beschreibung</th></tr>
+  <tr><td><code>listlib.length</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>Anzahl der Elemente</td></tr>
+  <tr><td><code>listlib.sum</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>Summe der Elemente</td></tr>
+  <tr><td><code>listlib.min</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>kleinstes Element</td></tr>
+  <tr><td><code>listlib.max</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>größtes Element</td></tr>
+  <tr><td><code>listlib.sort</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>aufsteigend sortieren</td></tr>
+  <tr><td><code>listlib.reverse</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>Liste in umgekehrter Reihenfolge</td></tr>
+  <tr><td><code>listlib.unique</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>Liste ohne Duplikate</td></tr>
+  <tr><td><code>listlib.contains</code></td><td><code>ll_item</code>, <code>ll_list</code></td><td><code>ll_result</code></td><td>ob das Element enthalten ist</td></tr>
+  <tr><td><code>listlib.append</code></td><td><code>ll_list</code>, <code>ll_item</code></td><td><code>ll_result</code></td><td>Liste mit angehängtem Element</td></tr>
+  <tr><td><code>listlib.range_n</code></td><td><code>ll_n</code></td><td><code>ll_result</code></td><td>Zahlen von 0 bis <code>n-1</code></td></tr>
+</table>
+<h3>lib/randlib.syh — Zufall (Präfix <code>rl_</code>)</h3>
+<table>
+  <tr><th>Unterprogramm</th><th>Eingabe</th><th>Ausgabe</th><th>Beschreibung</th></tr>
+  <tr><td><code>randlib.randint</code></td><td><code>rl_a</code>, <code>rl_b</code></td><td><code>rl_result</code></td><td>zufällige Ganzzahl in den Grenzen (inklusive)</td></tr>
+  <tr><td><code>randlib.uniform</code></td><td><code>rl_a</code>, <code>rl_b</code></td><td><code>rl_result</code></td><td>zufällige Gleitkommazahl</td></tr>
+  <tr><td><code>randlib.choice</code></td><td><code>rl_list</code></td><td><code>rl_result</code></td><td>zufälliges Element der Liste (als Zeichenkette)</td></tr>
+  <tr><td><code>randlib.shuffle</code></td><td><code>rl_list</code></td><td><code>rl_result</code></td><td>gemischte Kopie der Liste</td></tr>
+</table>
+<h3>lib/timelib.syh — Zeit (Präfix <code>tl_</code>)</h3>
+<table>
+  <tr><th>Unterprogramm</th><th>Eingabe</th><th>Ausgabe</th><th>Beschreibung</th></tr>
+  <tr><td><code>timelib.now</code></td><td>—</td><td><code>tl_result</code></td><td>aktueller Timestamp (Sekunden seit der Epoche)</td></tr>
+  <tr><td><code>timelib.strftime</code></td><td><code>tl_fmt</code></td><td><code>tl_result</code></td><td>aktuelle Zeit nach Format (z. B. <code>"%Y-%m-%d %H:%M:%S"</code>)</td></tr>
+  <tr><td><code>timelib.sleep</code></td><td><code>tl_sec</code></td><td>—</td><td>Ausführung für die angegebene Anzahl Sekunden pausieren</td></tr>
+</table>
+
+<h2 id="bsyhc">13. BSYHC — Der Compiler</h2>
+<p><strong>BSYHC</strong> (Base SisYpH Compiler, <code>bsyhc.py</code>) ist der Compiler der Sprache Sisyph. Er verpackt eine <code>.syh</code>-Datei in ein Array, in dem jede neue Zeile ein neues Element des Arrays ist, bettet eine Kopie des Interpreters in die Ausgabedatei ein und führt das Programm direkt aus dem Array aus. Die kompilierte <code>.py</code>-Datei ist eigenständig und benötigt kein <code>main.py</code> daneben.</p>
+<h3>Arbeitsmodi</h3>
+<table>
+  <tr><th>Modus</th><th>Befehl</th></tr>
+  <tr><td>Kompilieren</td><td><code>python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py</code></td></tr>
+  <tr><td>Dekompilieren</td><td><code>python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh</code></td></tr>
+  <tr><td>Interpretieren</td><td><code>python3 bsyhc.py -i b.syh</code></td></tr>
+</table>
+<p>Wenn nur eine Eingabedatei angegeben wird (ohne <code>-c</code> und <code>-d</code>), interpretiert BSYHC das Programm einfach, genau wie <code>main.py</code>.</p>
+<h3>Flags</h3>
+<table>
+  <tr><th>Flag</th><th>Zweck</th></tr>
+  <tr><td><code>-i, --input &lt;datei&gt;</code></td><td>Eingabedatei; kann wiederholt werden, um mehrere Dateien in eine Ausgabe zu kompilieren</td></tr>
+  <tr><td><code>-o, --output &lt;datei&gt;</code></td><td>Ausgabedatei (Standard: <code>&lt;eingabe&gt;.py</code> / <code>&lt;eingabe&gt;.syh</code>)</td></tr>
+  <tr><td><code>-c, --compile</code></td><td><code>.syh</code> in eine eigenständige <code>.py</code> kompilieren</td></tr>
+  <tr><td><code>-d, --decompile</code></td><td>eine kompilierte <code>.py</code> zurück in <code>.syh</code> dekompilieren</td></tr>
+  <tr><td><code>--merge concat | include</code></td><td>Art der Dateizusammenführung beim Kompilieren (Standard <code>concat</code>)</td></tr>
+  <tr><td><code>--split</code></td><td>beim Dekompilieren jede Quelldatei einzeln wiederherstellen (in das <code>-o</code>-Verzeichnis)</td></tr>
+</table>
+<h3>Mehrere Dateien kompilieren</h3>
+<p><code>-i</code> kann wiederholt werden — alle Dateien werden in einer einzigen Ausgabe gesammelt:</p>
+<pre><code>python3 bsyhc.py -i main.syh -i lib.syh -c -o program.py</code></pre>
+<ul>
+  <li><code>--merge concat</code> — die Zeilen der Dateien werden einfach der Reihe nach zusammengefügt.</li>
+  <li><code>--merge include</code> — die erste Datei ist der Einstiegspunkt, die übrigen werden wie bei <code>include</code> angehängt: ihre Marken erhalten das Präfix <code>datei.markierung</code> (zum Beispiel <code>goto lib.start</code>).</li>
+</ul>
+<h3>Dekompilieren</h3>
+<p>Die kompilierte Datei lässt sich leicht dekompilieren — das Programm wird aus dem Array wiederhergestellt:</p>
+<pre><code>python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh</code></pre>
+<p>Standardmäßig entsteht eine einzige zusammengeführte <code>.syh</code>. Mit dem Flag <code>--split</code> wird jede Quelldatei einzeln in das über <code>-o</code> angegebene Verzeichnis wiederhergestellt.</p>
+
+</main>
+
+<footer>© Sisyph Language. Die Dokumentation entspricht dem Interpreter <code>main.py</code> und dem Compiler <code>bsyhc.py</code>.</footer>
+
+</div>
+</body>
+</html>

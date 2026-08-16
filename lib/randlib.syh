@@ -1,0 +1,26 @@
+# randlib.syh — генерация случайных значений
+# Подключение: include randlib
+# Вызов подпрограммы: goto randlib.<имя> (возврат через goto back)
+# Входные переменные: rl_a, rl_b, rl_list
+# Результат всегда записывается в: rl_result
+include v
+
+@randint
+# rl_a, rl_b (целые границы включительно) -> rl_result (целое) | случайное целое
+v.int rl_result __import__('random').randint(int(rl_a), int(rl_b))
+goto back
+
+@uniform
+# rl_a, rl_b (границы) -> rl_result (число с плавающей точкой) | случайное число
+v.float rl_result __import__('random').uniform(float(rl_a), float(rl_b))
+goto back
+
+@choice
+# rl_list (список) -> rl_result (строка) | случайный элемент списка
+v.str rl_result str(__import__('random').choice(rl_list))
+goto back
+
+@shuffle
+# rl_list (список) -> rl_result (список) | перемешанная копия списка
+v.list rl_result __import__('random').sample(rl_list, len(rl_list))
+goto back

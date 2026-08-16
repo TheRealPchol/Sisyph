@@ -1,0 +1,61 @@
+# strlib.syh — строковые утилиты
+# Подключение: include strlib
+# Вызов подпрограммы: goto strlib.<имя> (возврат через goto back)
+# Входные переменные: sl_text, sl_sub, sl_old, sl_new, sl_sep, sl_list
+# Результат всегда записывается в: sl_result
+include v
+
+@upper
+# sl_text (строка) -> sl_result (строка) | в верхнем регистре
+v.str sl_result sl_text.upper()
+goto back
+
+@lower
+# sl_text (строка) -> sl_result (строка) | в нижнем регистре
+v.str sl_result sl_text.lower()
+goto back
+
+@capitalize
+# sl_text (строка) -> sl_result (строка) | с заглавной первой буквой
+v.str sl_result sl_text.capitalize()
+goto back
+
+@length
+# sl_text (строка) -> sl_result (целое) | длина строки
+v.int sl_result len(sl_text)
+goto back
+
+@strip
+# sl_text (строка) -> sl_result (строка) | без пробелов по краям
+v.str sl_result sl_text.strip()
+goto back
+
+@reverse
+# sl_text (строка) -> sl_result (строка) | перевёрнутая строка
+v.str sl_result sl_text[::-1]
+goto back
+
+@contains
+# sl_sub (подстрока), sl_text (строка) -> sl_result (True | False) | входит ли подстрока
+v.bool sl_result sl_sub in sl_text
+goto back
+
+@replace
+# sl_text (строка), sl_old (что менять), sl_new (на что) -> sl_result (строка)
+v.str sl_result sl_text.replace(sl_old, sl_new)
+goto back
+
+@split
+# sl_text (строка), sl_sep (разделитель) -> sl_result (список) | разбиение на части
+v.list sl_result sl_text.split(sl_sep)
+goto back
+
+@join
+# sl_list (список), sl_sep (разделитель) -> sl_result (строка) | склейка в строку
+v.str sl_result sl_sep.join(sl_list)
+goto back
+
+@is_digit
+# sl_text (строка) -> sl_result (True | False) | состоит ли только из цифр
+v.bool sl_result sl_text.isdigit()
+goto back

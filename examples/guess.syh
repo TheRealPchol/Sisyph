@@ -1,0 +1,41 @@
+# guess.syh — игра «Угадай число»
+# Демонстрирует: randlib (случайные числа), strlib (строки), stdlib, v.
+# Запуск:  python3 main.py guess.syh  (или  python3 bsyhc.py -i guess.syh)
+include v
+include stdlib
+include randlib
+include strlib
+
+v.int rl_a 1
+v.int rl_b 10
+goto randlib.randint
+v.int secret rl_result
+
+@main
+stdlib.stdout "Угадай число от 1 до 10: "
+stdlib.stdin guess "Твой вариант: "
+
+v.str sl_text guess
+goto strlib.is_digit
+if not sl_result then goto not_number
+v.int guess guess
+
+if guess == secret then goto win
+if guess < secret then goto to_low
+goto to_high
+
+@to_low
+stdlib.stdout "Слишком мало! Попробуй ещё раз.\n"
+goto main
+
+@to_high
+stdlib.stdout "Слишком много! Попробуй ещё раз.\n"
+goto main
+
+@not_number
+stdlib.stdout "Это не число! Попробуй ещё раз.\n"
+goto main
+
+@win
+stdlib.stdout f"Поздравляю, ты угадал! Число было {secret}.\n"
+exit 0

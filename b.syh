@@ -1,0 +1,26 @@
+include v
+include stdlib
+
+v.str false_o "Ты не угадал("
+v.str true_o "Ты угадал!"
+
+@main
+stdlib.stdin sa "Введите строку: "
+v.str object "НИЧЕГО"
+goto check
+exit 0
+
+@check
+if sa == object then goto true
+if sa != object then goto false
+goto back
+
+@true
+stdlib.stdout true_o 
+goto back
+
+@false
+stdlib.stdout false_o, "\n"
+goto main
+
+

@@ -1,0 +1,29 @@
+# math_demo.syh — демонстрация mathlib и listlib
+# Запуск:  python3 main.py math_demo.syh  (или  python3 bsyhc.py -i math_demo.syh)
+include v
+include stdlib
+include mathlib
+include listlib
+
+v.int ml_x 6
+goto mathlib.factorial
+stdlib.stdout f"6! = {ml_result}\n"
+
+v.int ml_a 48
+v.int ml_b 36
+goto mathlib.gcd
+stdlib.stdout f"gcd(48, 36) = {ml_result}\n"
+
+v.list ll_list [12, 7, 9, 12, 3, 7, 21]
+goto listlib.unique
+v.list ll_list ll_result
+goto listlib.sort
+v.list ll_list ll_result
+goto listlib.sum
+v.int total ll_result
+goto listlib.max
+v.int biggest ll_result
+
+stdlib.stdout f"числа: {ll_list}\n"
+stdlib.stdout f"сумма: {total}, максимум: {biggest}\n"
+exit 0

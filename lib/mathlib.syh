@@ -1,0 +1,56 @@
+# mathlib.syh — математические утилиты
+# Подключение: include mathlib
+# Вызов подпрограммы: goto mathlib.<имя> (возврат через goto back)
+# Входные переменные: ml_x, ml_a, ml_b, ml_lo, ml_hi
+# Результат всегда записывается в: ml_result
+include v
+
+@abs
+# ml_x (число) -> ml_result (число) | модуль числа
+v.int ml_result abs(ml_x)
+goto back
+
+@sign
+# ml_x (число) -> ml_result (-1 | 0 | 1) | знак числа
+v.int ml_result (ml_x > 0) - (ml_x < 0)
+goto back
+
+@min2
+# ml_a, ml_b (числа) -> ml_result (число) | меньшее из двух
+v.int ml_result min(ml_a, ml_b)
+goto back
+
+@max2
+# ml_a, ml_b (числа) -> ml_result (число) | большее из двух
+v.int ml_result max(ml_a, ml_b)
+goto back
+
+@clamp
+# ml_x (число), ml_lo, ml_hi (границы) -> ml_result (число) | ограничение значения
+v.int ml_result min(max(ml_x, ml_lo), ml_hi)
+goto back
+
+@pow
+# ml_a (основание), ml_b (степень) -> ml_result (число) | a в степени b
+v.int ml_result ml_a ** ml_b
+goto back
+
+@is_even
+# ml_x (целое) -> ml_result (True | False) | чётное ли число
+v.bool ml_result ml_x % 2 == 0
+goto back
+
+@is_odd
+# ml_x (целое) -> ml_result (True | False) | нечётное ли число
+v.bool ml_result ml_x % 2 != 0
+goto back
+
+@factorial
+# ml_x (неотрицательное целое) -> ml_result (целое) | факториал числа
+v.int ml_result __import__('math').factorial(int(ml_x))
+goto back
+
+@gcd
+# ml_a, ml_b (целые) -> ml_result (целое) | наибольший общий делитель
+v.int ml_result __import__('math').gcd(int(ml_a), int(ml_b))
+goto back

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sisyph — документация</title>
+<style>
+  :root {
+    --bg: #f5f4f1;
+    --panel: #ffffff;
+    --ink: #1f2328;
+    --muted: #6a6f78;
+    --accent: #8a5a2b;
+    --accent-soft: #efe6da;
+    --code-bg: #1f2328;
+    --code-ink: #e8e6e3;
+    --line: #dcd8d1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 20px 64px; }
+  header.hero {
+    background: var(--ink);
+    color: #f5f4f1;
+    border-radius: 14px;
+    padding: 36px 40px;
+    margin-bottom: 28px;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 34px; }
+  header.hero p { margin: 0; color: #c9c4bb; }
+  header.hero .badge {
+    display: inline-block;
+    margin-top: 14px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 999px;
+  }
+  nav.toc {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 28px;
+    margin-bottom: 28px;
+  }
+  nav.toc h2 { margin: 0 0 10px; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  nav.toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 40px; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  main { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 32px 40px; }
+  h2 {
+    font-size: 22px;
+    margin: 40px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent-soft);
+  }
+  h2:first-child { margin-top: 0; }
+  h3 { font-size: 17px; margin: 26px 0 10px; color: var(--accent); }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0; padding-left: 24px; }
+  li { margin: 4px 0; }
+  code {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.88em;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border-radius: 10px;
+    padding: 18px 22px;
+    overflow-x: auto;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14.5px; }
+  th, td { border: 1px solid var(--line); padding: 9px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  tr:nth-child(even) td { background: #faf9f7; }
+  blockquote {
+    margin: 14px 0;
+    padding: 12px 18px;
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 10px 10px 0;
+  }
+  blockquote p { margin: 4px 0; }
+  footer {
+    margin-top: 28px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  @media (max-width: 640px) {
+    nav.toc ol { columns: 1; }
+    main { padding: 22px 18px; }
+    header.hero { padding: 26px 22px; }
+    header.hero h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="badge">Sisyph Language</span>
+  <h1>Документация</h1>
+  <p>Императивный строко-ориентированный язык программирования. Интерпретатор — <code>main.py</code>.</p>
+</header>
+
+<nav class="toc">
+  <h2>Оглавление</h2>
+  <ol>
+    <li><a href="#about">О языке</a></li>
+    <li><a href="#run">Запуск программ</a></li>
+    <li><a href="#syntax">Синтаксис</a></li>
+    <li><a href="#control">Управляющие команды</a></li>
+    <li><a href="#stdlib">Библиотека stdlib</a></li>
+    <li><a href="#v">Библиотека v</a></li>
+    <li><a href="#file">Библиотека file</a></li>
+    <li><a href="#pylib">Библиотека pylib</a></li>
+    <li><a href="#examples">Примеры программ</a></li>
+    <li><a href="#limits">Ограничения и особенности</a></li>
+    <li><a href="#errors">Сообщения об ошибках</a></li>
+    <li><a href="#ecosystem">Экосистема</a></li>
+    <li><a href="#bsyhc">BSYHC — компилятор</a></li>
+    <li><a href="#libs">Библиотеки языка</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<h2 id="about">1. О языке</h2>
+<p><strong>Sisyph</strong> — императивный строко-ориентированный язык программирования. Программа — это последовательность строк-команд, которые построчно выполняет интерпретатор, написанный на Python (<code>main.py</code>).</p>
+<p>Ключевая особенность: Sisyph не изобретает собственную арифметику и логику — все выражения и значения переменных являются выражениями Python. Язык отвечает за структуру программы (метки, переходы, подпрограммы), а вычисления делегирует интерпретатору Python.</p>
+<table>
+  <tr><th>Свойство</th><th>Значение</th></tr>
+  <tr><td>Имя</td><td>Sisyph</td></tr>
+  <tr><td>Расширение файлов</td><td><code>.syh</code></td></tr>
+  <tr><td>Парадигма</td><td>императивная, строко-ориентированная</td></tr>
+  <tr><td>Интерпретатор</td><td><code>main.py</code> (Python 3)</td></tr>
+  <tr><td>Выражения</td><td>Python (<code>eval</code> / <code>exec</code>)</td></tr>
+  <tr><td>Типизация</td><td>динамическая (типы Python)</td></tr>
+  <tr><td>Область видимости</td><td>глобальная (единое пространство Python)</td></tr>
+</table>
+
+<h2 id="run">2. Запуск программ</h2>
+<p>Запуск программы выполняется командой:</p>
+<pre><code>python3 main.py программа.syh</code></pre>
+<p>Пример:</p>
+<pre><code>python3 main.py a.syh</code></pre>
+<p>Если файл не найден, интерпретатор выводит сообщение об ошибке и завершает работу.</p>
+<p>Программу можно запустить и через компилятор BSYHC в режиме интерпретации (см. <a href="#bsyhc">раздел 13</a>):</p>
+<pre><code>python3 bsyhc.py -i программа.syh</code></pre>
+
+<h2 id="syntax">3. Синтаксис</h2>
+<p>Программа состоит из строк. Каждая строка содержит одну команду. Пустые строки игнорируются.</p>
+<h3>Разделитель команд</h3>
+<p>Несколько команд можно записать в одну строку через точку с запятой:</p>
+<pre><code>goto check; goto back</code></pre>
+<h3>Метки</h3>
+<p>Метка — это имя строки, к которой можно перейти. Метка начинается с символа <code>@</code> и занимает отдельную строку:</p>
+<pre><code>@main
+stdlib.stdout "Привет!"</code></pre>
+<p>Строки-метки при выполнении пропускаются.</p>
+<h3>Комментарии</h3>
+<p>Собственного синтаксиса комментариев в языке нет. Поскольку выражения обрабатываются Python, внутри выражений можно использовать символ <code>#</code> Python-комментария.</p>
+<h3>Регистр символов</h3>
+<p>Команды чувствительны к регистру: <code>goto</code> — команда, <code>GOTO</code> — нет.</p>
+<h3>Переменные</h3>
+<p>Переменные создаются неявно командами <code>v.*</code>, <code>stdlib.stdin</code>, <code>file.*</code> и <code>pylib.*</code>. Отдельного объявления не требуется. Имена переменных — обычные имена Python.</p>
+
+<h2 id="control">4. Управляющие команды</h2>
+<h3>include</h3>
+<p>Подключает файл библиотеки или встроенную библиотеку:</p>
+<pre><code>include имя</code></pre>
+<p>Если файл <code>имя.syh</code> существует, его строки добавляются в конец текущей программы, а метки файла становятся доступными с префиксом <code>имя.метка</code>:</p>
+<pre><code>include lib
+goto lib.start</code></pre>
+<p>Если файла нет, <code>имя</code> считается встроенной библиотекой. Встроенные библиотеки: <code>stdlib</code>, <code>v</code>, <code>file</code>, <code>pylib</code>.</p>
+<h3>goto</h3>
+<p>Безусловный переход на метку:</p>
+<pre><code>goto метка</code></pre>
+<p>Позиция перехода сохраняется в стеке вызовов, поэтому впоследствии можно вернуться назад.</p>
+<h3>goto back</h3>
+<p>Возврат из подпрограммы:</p>
+<pre><code>goto back</code></pre>
+<p>Берёт из стека вызовов позицию последнего перехода и продолжает выполнение с неё. Если стек пуст — выводится сообщение об ошибке.</p>
+<p>Пример подпрограммы:</p>
+<pre><code>@main
+goto work
+exit 0
+
+@work
+stdlib.stdout "работаю..."
+goto back</code></pre>
+<h3>exit</h3>
+<p>Завершает программу:</p>
+<pre><code>exit
+exit 0
+exit 5</code></pre>
+<ul>
+  <li><code>exit</code> / <code>exit 0</code> — успешное завершение, выводится сообщение <code>The program has completed successfully.</code></li>
+  <li><code>exit &lt;код&gt;</code> — завершение с кодом, выводится сообщение <code>The program terminated with code "&lt;код&gt;".</code></li>
+</ul>
+<h3>if</h3>
+<p>Однострочное условное выполнение:</p>
+<pre><code>if &lt;выражение&gt; then &lt;команда&gt;</code></pre>
+<p>Если выражение истинно (приводится к <code>bool</code> в Python), выполняется команда после <code>then</code>. Конструкции <code>else</code> нет.</p>
+<p>Пример:</p>
+<pre><code>if x > 10 then goto big
+if x <= 10 then goto small</code></pre>
+
+<h2 id="stdlib">5. Библиотека stdlib</h2>
+<p>Для использования подключите <code>include stdlib</code>.</p>
+<h3>stdlib.stdout</h3>
+<p>Печать значения выражения:</p>
+<pre><code>stdlib.stdout &lt;выражение&gt;</code></pre>
+<p>Выражение вычисляется Python, поддерживаются f-строки:</p>
+<pre><code>stdlib.stdout f"Значение: {x}"</code></pre>
+<h3>stdlib.stdin</h3>
+<p>Ввод строки с клавиатуры:</p>
+<pre><code>stdlib.stdin &lt;переменная&gt; &lt;подсказка&gt;</code></pre>
+<p>Результат сохраняется в переменную. Подсказка может быть строкой или выражением:</p>
+<pre><code>stdlib.stdin name "Как тебя зовут? "</code></pre>
+<p>Ввод без сохранения:</p>
+<pre><code>stdlib.stdin &lt;подсказка&gt;</code></pre>
+
+<h2 id="v">6. Библиотека v</h2>
+<p>Для использования подключите <code>include v</code>.</p>
+<p>Библиотека преобразует значение выражения в указанный тип и сохраняет в переменную:</p>
+<table>
+  <tr><th>Команда</th><th>Тип</th></tr>
+  <tr><td><code>v.int</code></td><td>целое число (<code>int</code>)</td></tr>
+  <tr><td><code>v.str</code></td><td>строка (<code>str</code>)</td></tr>
+  <tr><td><code>v.float</code></td><td>число с плавающей точкой (<code>float</code>)</td></tr>
+  <tr><td><code>v.bool</code></td><td>логическое значение (<code>bool</code>)</td></tr>
+  <tr><td><code>v.list</code></td><td>список (<code>list</code>)</td></tr>
+</table>
+<p>Синтаксис:</p>
+<pre><code>v.int x "42"
+v.list l [1, 2, 3]
+v.str s l[0]</code></pre>
+
+<h2 id="file">7. Библиотека file</h2>
+<p>Для использования подключите <code>include file</code>.</p>
+<table>
+  <tr><th>Команда</th><th>Назначение</th></tr>
+  <tr><td><code>file.read &lt;переменная&gt; &lt;путь&gt;</code></td><td>читает файл целиком в переменную</td></tr>
+  <tr><td><code>file.write &lt;путь&gt; &lt;выражение&gt;</code></td><td>записывает выражение в файл (перезапись)</td></tr>
+  <tr><td><code>file.append &lt;путь&gt; &lt;выражение&gt;</code></td><td>дописывает выражение в конец файла</td></tr>
+  <tr><td><code>file.delete &lt;путь&gt;</code></td><td>удаляет файл</td></tr>
+  <tr><td><code>file.exists &lt;переменная&gt; &lt;путь&gt;</code></td><td>сохраняет <code>True</code>/<code>False</code> о существовании файла</td></tr>
+  <tr><td><code>file.lines &lt;переменная&gt; &lt;путь&gt;</code></td><td>сохраняет список строк файла</td></tr>
+</table>
+<p>Пример:</p>
+<pre><code>file.write "data.txt" f"строка: {x}\n"
+file.read content "data.txt"
+file.exists ok "data.txt"</code></pre>
+<p>Если файл не удалось прочитать или удалить, выводится <code>Sisyph File Error</code> с текстом исключения, а переменная получает значение по умолчанию (<code>""</code> или <code>[]</code>).</p>
+
+<h2 id="pylib">8. Библиотека pylib</h2>
+<p>Для использования подключите <code>include pylib</code>.</p>
+<p>Библиотека даёт прямой доступ к Python.</p>
+<table>
+  <tr><th>Команда</th><th>Назначение</th></tr>
+  <tr><td><code>pylib.exec &lt;код&gt;</code></td><td>выполняет произвольный Python-код</td></tr>
+  <tr><td><code>pylib.eval &lt;переменная&gt; &lt;выражение&gt;</code></td><td>вычисляет выражение и сохраняет результат</td></tr>
+  <tr><td><code>pylib.import &lt;модуль&gt;</code></td><td>импортирует модуль Python</td></tr>
+  <tr><td><code>pylib.importas &lt;модуль&gt; &lt;псевдоним&gt;</code></td><td>импортирует модуль с псевдонимом</td></tr>
+  <tr><td><code>pylib.from &lt;код&gt;</code></td><td>выполняет <code>from &lt;код&gt;</code></td></tr>
+  <tr><td><code>pylib.get &lt;переменная&gt; &lt;переменная Python&gt;</code></td><td>копирует значение переменной Python</td></tr>
+  <tr><td><code>pylib.set &lt;переменная Python&gt; &lt;выражение&gt;</code></td><td>присваивает значение переменной Python</td></tr>
+  <tr><td><code>pylib.print &lt;выражение&gt;</code></td><td>вычисляет выражение и печатает результат</td></tr>
+</table>
+<p>Пример:</p>
+<pre><code>pylib.importas math m
+pylib.set x m.sqrt(16)
+pylib.print x</code></pre>
+
+<h2 id="examples">9. Примеры программ</h2>
+<h3>Пример 1. Списки и преобразование типов (<code>a.syh</code>)</h3>
+<pre><code>include v
+include stdlib
+
+v.list l ["po", 14, 17.3, True, ["object"]]
+v.str q l[0]
+v.str w l[1]
+v.str e l[2]
+v.str r l[3]
+v.str t l[4]
+v.str u l[4][0]
+stdlib.stdout f"{q}\n{w}\n{e}\n{r}\n{t}\n{u}\n"
+exit 0</code></pre>
+<p>Вывод:</p>
+<pre><code>po
+14
+17.3
+True
+["object"]
+object</code></pre>
+<h3>Пример 2. Ввод, переходы и подпрограммы (<code>b.syh</code>)</h3>
+<pre><code>include v
+include stdlib
+
+v.str false_o "Ты не угадал("
+v.str true_o "Ты угадал!"
+
+@main
+stdlib.stdin sa "Введите строку: "
+v.str object "НИЧЕГО"
+goto check
+exit 0
+
+@check
+if sa == object then goto true
+if sa != object then goto false
+goto back
+
+@true
+stdlib.stdout true_o
+goto back
+
+@false
+stdlib.stdout false_o, "\n"
+goto main</code></pre>
+<p>Программа просит ввести строку, сравнивает её со словом «НИЧЕГО» и выводит результат. Подпрограммы <code>@true</code> и <code>@false</code> возвращаются через <code>goto back</code>.</p>
+
+<h2 id="limits">10. Ограничения и особенности</h2>
+<ul>
+  <li><strong>Нет циклов.</strong> Повторение организуется только через <code>goto</code>.</li>
+  <li><strong>Нет функций.</strong> Роль подпрограмм выполняют метки с <code>goto</code> / <code>goto back</code>.</li>
+  <li><strong>Нет локальных переменных.</strong> Всё хранится в глобальном пространстве Python.</li>
+  <li><strong>Нет <code>else</code>.</strong> Ветвление — только через <code>if ... then</code>.</li>
+  <li><strong>Однострочный <code>if</code>.</strong> Команда после <code>then</code> — одна, но может содержать <code>;</code>.</li>
+  <li><strong>Разбор по пробелам и точкам.</strong> Аргументы, содержащие пробелы (например, пути файлов), разбираются небезопасно: <code>file.write "my file.txt" x</code> работать не будет.</li>
+  <li><strong>Общий стек вызовов.</strong> Рекурсивные переходы допустимы, но не ограничиваются.</li>
+  <li><strong>Выражения — это Python.</strong> Любая ошибка в выражении — это ошибка Python, а не Sisyph.</li>
+  <li><strong><code>include</code> вставляет код.</strong> Подключённый файл добавляется в текущую программу и исполняется при достижении.</li>
+</ul>
+
+<h2 id="errors">11. Сообщения об ошибках</h2>
+<table>
+  <tr><th>Сообщение</th><th>Ситуация</th></tr>
+  <tr><td><code>Sisyph Error: File '&lt;имя&gt;' not found.</code></td><td>файл программы не найден</td></tr>
+  <tr><td><code>Sisyph Error: Unknown label '&lt;метка&gt;'</code></td><td>переход на несуществующую метку</td></tr>
+  <tr><td><code>Sisyph Error: Call stack is empty, nowhere to return</code></td><td><code>goto back</code> при пустом стеке</td></tr>
+  <tr><td><code>Sisyph File Error: &lt;исключение&gt;</code></td><td>ошибка операций с файлами</td></tr>
+  <tr><td><code>Sisyph PyLib Error: &lt;тип&gt;: &lt;сообщение&gt;</code></td><td>ошибка Python в библиотеке pylib</td></tr>
+  <tr><td><code>The program has completed successfully.</code></td><td>успешное завершение (<code>exit 0</code>)</td></tr>
+  <tr><td><code>The program terminated with code "&lt;код&gt;"</code></td><td>завершение с кодом</td></tr>
+</table>
+
+<h2 id="ecosystem">12. Экосистема</h2>
+<ul>
+  <li><strong>Файлы <code>.syh</code></strong> — программы и библиотеки.</li>
+  <li><strong><code>include</code></strong> — механизм повторного использования: метки чужих файлов вызываются с префиксом имени файла (<code>имя.метка</code>).</li>
+  <li><strong>Встроенные библиотеки</strong> — <code>stdlib</code> (ввод/вывод), <code>v</code> (типы), <code>file</code> (файлы), <code>pylib</code> (Python).</li>
+  <li><strong><code>pylib</code></strong> — точка расширения: любой Python-код доступен из Sisyph без изменения интерпретатора.</li>
+  <li><strong>BSYHC</strong> — компилятор: <code>bsyhc.py</code> упаковывает <code>.syh</code> в самодостаточный <code>.py</code>, умеет декомпиляцию и мультифайловую сборку (см. <a href="#bsyhc">раздел 13</a>).</li>
+  <li><strong>Библиотеки языка</strong> — <code>mathlib</code>, <code>strlib</code>, <code>listlib</code>, <code>randlib</code>, <code>timelib</code>: подпрограммы для математики, строк, списков, случайностей и времени (см. <a href="#libs">раздел 14</a>).</li>
+</ul>
+
+<h2 id="libs">14. Библиотеки языка</h2>
+<p>Вместе с языком поставляются библиотеки подпрограмм — обычные файлы <code>.syh</code>, которые подключаются через <code>include</code> и вызываются через <code>goto &lt;библиотека&gt;.&lt;подпрограмма&gt;</code>. Файлы лежат в каталоге <code>lib/</code> и подключаются без пути.</p>
+<h3>Соглашения</h3>
+<ul>
+  <li>Файл подключается командой <code>include &lt;имя&gt;</code>, подпрограмма вызывается <code>goto &lt;имя&gt;.&lt;подпрограмма&gt;</code>, возврат из подпрограммы — <code>goto back</code>.</li>
+  <li>Подпрограмма читает входные переменные (свой префикс у каждой библиотеки) и записывает результат в переменную <code>&lt;префикс&gt;_result</code>.</li>
+  <li>Данные передаются через глобальные переменные, поэтому перед каждым вызовом их нужно переустанавливать.</li>
+  <li>Внутри подпрограмм нет циклов: каждый <code>goto</code> кладёт позицию в стек вызовов, поэтому цикл внутри подпрограммы «засоряет» стек. Повторения организуются в основном коде программы.</li>
+  <li>Компилятор BSYHC может встроить библиотеки прямо в скомпилированный файл — см. раздел 13, флаг <code>--merge include</code>.</li>
+</ul>
+<h3>Пример</h3>
+<pre><code>include v
+include stdlib
+include mathlib
+
+v.int ml_x 5
+goto mathlib.factorial
+stdlib.stdout f"5! = {ml_result}\n"
+exit 0</code></pre>
+<h3>lib/mathlib.syh — математика (префикс <code>ml_</code>)</h3>
+<table>
+  <tr><th>Подпрограмма</th><th>Вход</th><th>Выход</th><th>Описание</th></tr>
+  <tr><td><code>mathlib.abs</code></td><td><code>ml_x</code></td><td><code>ml_result</code></td><td>модуль числа</td></tr>
+  <tr><td><code>mathlib.sign</code></td><td><code>ml_x</code></td><td><code>ml_result</code></td><td>знак числа: −1, 0 или 1</td></tr>
+  <tr><td><code>mathlib.min2</code></td><td><code>ml_a</code>, <code>ml_b</code></td><td><code>ml_result</code></td><td>меньшее из двух чисел</td></tr>
+  <tr><td><code>mathlib.max2</code></td><td><code>ml_a</code>, <code>ml_b</code></td><td><code>ml_result</code></td><td>большее из двух чисел</td></tr>
+  <tr><td><code>mathlib.clamp</code></td><td><code>ml_x</code>, <code>ml_lo</code>, <code>ml_hi</code></td><td><code>ml_result</code></td><td>ограничение значения границами</td></tr>
+  <tr><td><code>mathlib.pow</code></td><td><code>ml_a</code>, <code>ml_b</code></td><td><code>ml_result</code></td><td><code>a</code> в степени <code>b</code></td></tr>
+  <tr><td><code>mathlib.is_even</code></td><td><code>ml_x</code></td><td><code>ml_result</code></td><td>чётное ли число</td></tr>
+  <tr><td><code>mathlib.is_odd</code></td><td><code>ml_x</code></td><td><code>ml_result</code></td><td>нечётное ли число</td></tr>
+  <tr><td><code>mathlib.factorial</code></td><td><code>ml_x</code></td><td><code>ml_result</code></td><td>факториал числа</td></tr>
+  <tr><td><code>mathlib.gcd</code></td><td><code>ml_a</code>, <code>ml_b</code></td><td><code>ml_result</code></td><td>наибольший общий делитель</td></tr>
+</table>
+<h3>lib/strlib.syh — строки (префикс <code>sl_</code>)</h3>
+<table>
+  <tr><th>Подпрограмма</th><th>Вход</th><th>Выход</th><th>Описание</th></tr>
+  <tr><td><code>strlib.upper</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>строка в верхнем регистре</td></tr>
+  <tr><td><code>strlib.lower</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>строка в нижнем регистре</td></tr>
+  <tr><td><code>strlib.capitalize</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>строка с заглавной первой буквой</td></tr>
+  <tr><td><code>strlib.length</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>длина строки</td></tr>
+  <tr><td><code>strlib.strip</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>строка без пробелов по краям</td></tr>
+  <tr><td><code>strlib.reverse</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>перевёрнутая строка</td></tr>
+  <tr><td><code>strlib.contains</code></td><td><code>sl_sub</code>, <code>sl_text</code></td><td><code>sl_result</code></td><td>входит ли подстрока в строку</td></tr>
+  <tr><td><code>strlib.replace</code></td><td><code>sl_text</code>, <code>sl_old</code>, <code>sl_new</code></td><td><code>sl_result</code></td><td>замена подстроки</td></tr>
+  <tr><td><code>strlib.split</code></td><td><code>sl_text</code>, <code>sl_sep</code></td><td><code>sl_result</code></td><td>разбиение строки на список</td></tr>
+  <tr><td><code>strlib.join</code></td><td><code>sl_list</code>, <code>sl_sep</code></td><td><code>sl_result</code></td><td>склейка списка в строку</td></tr>
+  <tr><td><code>strlib.is_digit</code></td><td><code>sl_text</code></td><td><code>sl_result</code></td><td>состоит ли строка только из цифр</td></tr>
+</table>
+<h3>lib/listlib.syh — списки (префикс <code>ll_</code>)</h3>
+<table>
+  <tr><th>Подпрограмма</th><th>Вход</th><th>Выход</th><th>Описание</th></tr>
+  <tr><td><code>listlib.length</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>количество элементов</td></tr>
+  <tr><td><code>listlib.sum</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>сумма элементов</td></tr>
+  <tr><td><code>listlib.min</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>минимальный элемент</td></tr>
+  <tr><td><code>listlib.max</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>максимальный элемент</td></tr>
+  <tr><td><code>listlib.sort</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>сортировка по возрастанию</td></tr>
+  <tr><td><code>listlib.reverse</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>список в обратном порядке</td></tr>
+  <tr><td><code>listlib.unique</code></td><td><code>ll_list</code></td><td><code>ll_result</code></td><td>список без повторяющихся элементов</td></tr>
+  <tr><td><code>listlib.contains</code></td><td><code>ll_item</code>, <code>ll_list</code></td><td><code>ll_result</code></td><td>есть ли элемент в списке</td></tr>
+  <tr><td><code>listlib.append</code></td><td><code>ll_list</code>, <code>ll_item</code></td><td><code>ll_result</code></td><td>список с добавленным элементом</td></tr>
+  <tr><td><code>listlib.range_n</code></td><td><code>ll_n</code></td><td><code>ll_result</code></td><td>числа от 0 до <code>n-1</code></td></tr>
+</table>
+<h3>lib/randlib.syh — случайности (префикс <code>rl_</code>)</h3>
+<table>
+  <tr><th>Подпрограмма</th><th>Вход</th><th>Выход</th><th>Описание</th></tr>
+  <tr><td><code>randlib.randint</code></td><td><code>rl_a</code>, <code>rl_b</code></td><td><code>rl_result</code></td><td>случайное целое в границах (включительно)</td></tr>
+  <tr><td><code>randlib.uniform</code></td><td><code>rl_a</code>, <code>rl_b</code></td><td><code>rl_result</code></td><td>случайное число с плавающей точкой</td></tr>
+  <tr><td><code>randlib.choice</code></td><td><code>rl_list</code></td><td><code>rl_result</code></td><td>случайный элемент списка (строкой)</td></tr>
+  <tr><td><code>randlib.shuffle</code></td><td><code>rl_list</code></td><td><code>rl_result</code></td><td>перемешанная копия списка</td></tr>
+</table>
+<h3>lib/timelib.syh — время (префикс <code>tl_</code>)</h3>
+<table>
+  <tr><th>Подпрограмма</th><th>Вход</th><th>Выход</th><th>Описание</th></tr>
+  <tr><td><code>timelib.now</code></td><td>—</td><td><code>tl_result</code></td><td>текущий timestamp (секунды с эпохи)</td></tr>
+  <tr><td><code>timelib.strftime</code></td><td><code>tl_fmt</code></td><td><code>tl_result</code></td><td>текущее время по формату (например, <code>"%Y-%m-%d %H:%M:%S"</code>)</td></tr>
+  <tr><td><code>timelib.sleep</code></td><td><code>tl_sec</code></td><td>—</td><td>пауза выполнения на указанное число секунд</td></tr>
+</table>
+
+<h2 id="bsyhc">13. BSYHC — компилятор</h2>
+<p><strong>BSYHC</strong> (Base SisYpH Compiler, <code>bsyhc.py</code>) — компилятор языка Sisyph. Он упаковывает <code>.syh</code>-файл в массив, в котором каждая новая строка — новый элемент массива, встраивает в выходной файл копию интерпретатора и запускает программу уже из массива. Скомпилированный <code>.py</code>-файл самодостаточен и не требует <code>main.py</code> рядом.</p>
+<h3>Режимы работы</h3>
+<table>
+  <tr><th>Режим</th><th>Команда</th></tr>
+  <tr><td>Компиляция</td><td><code>python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py</code></td></tr>
+  <tr><td>Декомпиляция</td><td><code>python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh</code></td></tr>
+  <tr><td>Интерпретация</td><td><code>python3 bsyhc.py -i b.syh</code></td></tr>
+</table>
+<p>Если указать только входной файл (без <code>-c</code> и <code>-d</code>), BSYHC просто интерпретирует программу, как <code>main.py</code>.</p>
+<h3>Флаги</h3>
+<table>
+  <tr><th>Флаг</th><th>Назначение</th></tr>
+  <tr><td><code>-i, --input &lt;файл&gt;</code></td><td>входной файл; может повторяться для компиляции нескольких файлов в один выходной</td></tr>
+  <tr><td><code>-o, --output &lt;файл&gt;</code></td><td>выходной файл (по умолчанию: <code>&lt;входной&gt;.py</code> / <code>&lt;входной&gt;.syh</code>)</td></tr>
+  <tr><td><code>-c, --compile</code></td><td>скомпилировать <code>.syh</code> в самодостаточный <code>.py</code></td></tr>
+  <tr><td><code>-d, --decompile</code></td><td>декомпилировать скомпилированный <code>.py</code> обратно в <code>.syh</code></td></tr>
+  <tr><td><code>--merge concat | include</code></td><td>способ слияния файлов при компиляции (по умолчанию <code>concat</code>)</td></tr>
+  <tr><td><code>--split</code></td><td>при декомпиляции восстановить каждый исходный файл отдельно (в каталог из <code>-o</code>)</td></tr>
+</table>
+<h3>Компиляция нескольких файлов</h3>
+<p><code>-i</code> можно указывать несколько раз — все файлы соберутся в один выходной:</p>
+<pre><code>python3 bsyhc.py -i main.syh -i lib.syh -c -o program.py</code></pre>
+<ul>
+  <li><code>--merge concat</code> — строки файлов просто склеиваются по порядку.</li>
+  <li><code>--merge include</code> — первый файл — точка входа, остальные добавляются как при <code>include</code>: их метки получают префикс <code>имя_файла.метка</code> (например, <code>goto lib.start</code>).</li>
+</ul>
+<h3>Декомпиляция</h3>
+<p>Скомпилированный файл легко декомпилировать — программа восстанавливается из массива:</p>
+<pre><code>python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh</code></pre>
+<p>По умолчанию получается один объединённый <code>.syh</code>. С флагом <code>--split</code> каждый исходный файл восстанавливается отдельно в каталог, указанный через <code>-o</code>.</p>
+
+</main>
+
+<footer>© Sisyph Language. Документация соответствует интерпретатору <code>main.py</code> и компилятору <code>bsyhc.py</code>.</footer>
+
+</div>
+</body>
+</html>

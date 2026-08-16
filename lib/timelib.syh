@@ -1,0 +1,22 @@
+# timelib.syh — работа со временем
+# Подключение: include timelib
+# Вызов подпрограммы: goto timelib.<имя> (возврат через goto back)
+# Входные переменные: tl_fmt, tl_sec
+# Результат всегда записывается в: tl_result
+include v
+include pylib
+
+@now
+# -> tl_result (число с плавающей точкой) | текущий timestamp (секунды с эпохи)
+v.float tl_result __import__('time').time()
+goto back
+
+@strftime
+# tl_fmt (формат, например "%Y-%m-%d %H:%M:%S") -> tl_result (строка) | текущее время по формату
+v.str tl_result __import__('time').strftime(tl_fmt)
+goto back
+
+@sleep
+# tl_sec (секунды) -> пауза выполнения программы
+pylib.exec __import__('time').sleep(float(tl_sec))
+goto back

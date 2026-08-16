@@ -1,0 +1,17 @@
+include v
+include stdlib
+include mathlib
+include strlib
+
+v.int ml_x 5
+goto mathlib.factorial
+stdlib.stdout f"5! = {ml_result}\n"
+
+v.str sl_text "Sisyph"
+goto strlib.reverse
+stdlib.stdout f"reverse = {sl_result}\n"
+
+v.str sl_text "12345"
+goto strlib.is_digit
+stdlib.stdout f"is_digit = {sl_result}\n"
+exit 0

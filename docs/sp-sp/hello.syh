@@ -1,0 +1,4 @@
+include stdlib
+
+stdlib.stdout "¡Hola, mundo!"
+exit 0

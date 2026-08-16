@@ -1,0 +1,19 @@
+include v
+include stdlib
+
+v.str prompt "Gib eine Zahl ein: "
+stdlib.stdin user_input prompt
+v.int n user_input
+if n > 10 then goto big
+if n <= 10 then goto small
+
+@big
+stdlib.stdout f"{n} ist größer als 10!"
+goto end
+
+@small
+stdlib.stdout f"{n} ist nicht größer als 10."
+goto end
+
+@end
+exit 0

@@ -1,0 +1,12 @@
+include v
+include stdlib
+
+v.list l ["po", 14, 17.3, True, ["object"]]
+v.str q l[0]
+v.str w l[1]
+v.str e l[2]
+v.str r l[3]
+v.str t l[4]
+v.str u l[4][0]
+stdlib.stdout f"{q}\n{w}\n{e}\n{r}\n{t}\n{u}\n"
+exit 0

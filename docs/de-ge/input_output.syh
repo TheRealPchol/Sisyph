@@ -1,0 +1,8 @@
+include v
+include stdlib
+
+v.str prompt "Wie heißt du? "
+stdlib.stdin name prompt
+v.str greeting f"Hallo, {name}!"
+stdlib.stdout greeting
+exit 0
