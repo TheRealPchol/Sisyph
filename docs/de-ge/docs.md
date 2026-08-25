@@ -14,12 +14,13 @@ Das wesentliche Merkmal: Sisyph erfindet keine eigene Arithmetik oder Logik — 
 6. [Die Bibliothek v](#6-die-bibliothek-v)
 7. [Die Bibliothek file](#7-die-bibliothek-file)
 8. [Die Bibliothek pylib](#8-die-bibliothek-pylib)
-9. [Beispielprogramme](#9-beispielprogramme)
-10. [Einschränkungen und Besonderheiten](#10-einschränkungen-und-besonderheiten)
-11. [Fehlermeldungen](#11-fehlermeldungen)
-12. [Ökosystem](#12-ökosystem)
-13. [BSYHC — Der Compiler](#13-bsyhc--der-compiler)
-14. [Sprachbibliotheken](#14-sprachbibliotheken)
+9. [Die Bibliothek dc](#9-die-bibliothek-dc)
+10. [Beispielprogramme](#10-beispielprogramme)
+11. [Einschränkungen und Besonderheiten](#11-einschränkungen-und-besonderheiten)
+12. [Fehlermeldungen](#12-fehlermeldungen)
+13. [Ökosystem](#13-ökosystem)
+14. [BSYHC — Der Compiler](#14-bsyhc--der-compiler)
+15. [Sprachbibliotheken](#15-sprachbibliotheken)
 
 ## 1. Über die Sprache
 
@@ -49,7 +50,7 @@ python3 main.py a.syh
 
 Wenn die Datei nicht gefunden wird, gibt der Interpreter eine Fehlermeldung aus und beendet sich.
 
-Ein Programm kann auch über den BSYHC-Compiler im Interpretationsmodus gestartet werden (siehe [Abschnitt 13](#13-bsyhc--der-compiler)):
+Ein Programm kann auch über den BSYHC-Compiler im Interpretationsmodus gestartet werden (siehe [Abschnitt 14](#14-bsyhc--der-compiler)):
 
 ```
 python3 bsyhc.py -i programm.syh
@@ -80,7 +81,13 @@ Zeilen mit Marken werden bei der Ausführung übersprungen.
 
 ### Kommentare
 
-Die Sprache hat keine eigene Kommentarsyntax. Da Ausdrücke von Python verarbeitet werden, kann innerhalb von Ausdrücken das Python-Kommentarzeichen `#` verwendet werden.
+Die Sprache verwendet `~~` für Zeilenkommentare. Alles nach `~~` in einer Zeile wird ignoriert:
+
+```
+stdlib.stdout "Hallo" ~~ das ist ein Kommentar
+```
+
+Zusätzlich kann `#` innerhalb von Python-Ausdrücken verwendet werden.
 
 ### Groß-/Kleinschreibung
 
@@ -107,7 +114,7 @@ include lib
 goto lib.start
 ```
 
-Wenn die Datei nicht existiert, gilt `name` als eingebaute Bibliothek. Eingebaute Bibliotheken: `stdlib`, `v`, `file`, `pylib`.
+Wenn die Datei nicht existiert, gilt `name` als eingebaute Bibliothek. Eingebaute Bibliotheken: `stdlib`, `v`, `file`, `pylib`, `dc`.
 
 ### goto
 
@@ -279,7 +286,38 @@ pylib.set x m.sqrt(16)
 pylib.print x
 ```
 
-## 9. Beispielprogramme
+## 9. Die Bibliothek dc
+
+Zur Verwendung `include dc` einfügen.
+
+Die Bibliothek implementiert Datenklassen — benannte Wörterbücher mit Schlüssel-Wert-Paaren.
+
+| Befehl | Zweck |
+|---|---|
+| `dc.mkdc <name>` | erstellt eine neue leere Datenklasse |
+| `dc.set <name>(<schlüssel> :: <wert>)` | setzt ein Schlüssel-Wert-Paar in der Datenklasse |
+| `dc.get <variable> <name>(<schlüssel>)` | liest den Wert eines Schlüssels und speichert ihn in einer Variablen |
+| `dc.remkey <name> <schlüssel>` | entfernt einen Schlüssel aus der Datenklasse |
+| `dc.move FROMDC(KEY) TODC(KEY)` | verschiebt einen Schlüssel von einer Datenklasse zur anderen (Quelle wird gelöscht) |
+| `dc.copy FROMDC(KEY) TODC(KEY)` | kopiert einen Schlüssel von einer Datenklasse zur anderen (Quelle bleibt erhalten) |
+| `dc.copy2var <variable> <name>(<key>)` | kopiert den Wert eines Datenklassen-Schlüssels in eine Variable |
+| `dc.move2var <variable> <name>(<key>)` | verschiebt den Wert eines Datenklassen-Schlüssels in eine Variable (Schlüssel wird gelöscht) |
+
+Syntax:
+
+```
+dc.mkdc a
+dc.mkdc b
+dc.set a(name :: "Alice")
+dc.move a(name) b(name)
+dc.copy b(name) a(name2)
+dc.copy2var myvar b(name)
+dc.move2var myvar2 a(name2)
+```
+
+Der Wert in `dc.set` wird als Python-Ausdruck ausgewertet. Bei Auswertungsfehlung wird der rohe String verwendet.
+
+## 10. Beispielprogramme
 
 ### Beispiel 1. Listen und Typkonvertierung (`a.syh`)
 
@@ -340,7 +378,7 @@ goto main
 
 Das Programm fragt eine Zeichenkette ab, vergleicht sie mit dem Wort «НИЧЕГО» und gibt das Ergebnis aus. Die Unterprogramme `@true` und `@false` kehren über `goto back` zurück.
 
-## 10. Einschränkungen und Besonderheiten
+## 11. Einschränkungen und Besonderheiten
 
 - **Keine Schleifen.** Wiederholungen werden ausschließlich über `goto` organisiert.
 - **Keine Funktionen.** Marken mit `goto` / `goto back` dienen als Unterprogramme.
@@ -352,7 +390,7 @@ Das Programm fragt eine Zeichenkette ab, vergleicht sie mit dem Wort «НИЧЕ�
 - **Ausdrücke sind Python.** Jeder Fehler in einem Ausdruck ist ein Python-Fehler, kein Sisyph-Fehler.
 - **`include` fügt Code ein.** Die eingebundene Datei wird an das aktuelle Programm angehängt und beim Erreichen ausgeführt.
 
-## 11. Fehlermeldungen
+## 12. Fehlermeldungen
 
 | Meldung | Situation |
 |---|---|
@@ -364,16 +402,16 @@ Das Programm fragt eine Zeichenkette ab, vergleicht sie mit dem Wort «НИЧЕ�
 | `The program has completed successfully.` | erfolgreiche Beendigung (`exit 0`) |
 | `The program terminated with code "<code>"` | Beendigung mit einem Code |
 
-## 12. Ökosystem
+## 13. Ökosystem
 
 - **`.syh`-Dateien** — Programme und Bibliotheken.
 - **`include`** — der Wiederverwendungsmechanismus: Marken fremder Dateien werden mit dem Präfix des Dateinamens aufgerufen (`name.markierung`).
-- **Eingebaute Bibliotheken** — `stdlib` (Ein-/Ausgabe), `v` (Typen), `file` (Dateien), `pylib` (Python).
+- **Eingebaute Bibliotheken** — `stdlib` (Ein-/Ausgabe), `v` (Typen), `file` (Dateien), `pylib` (Python), `dc` (Datenklassen).
 - **`pylib`** — der Erweiterungspunkt: beliebiger Python-Code ist aus Sisyph erreichbar, ohne den Interpreter zu ändern.
-- **BSYHC** — der Compiler: `bsyhc.py` verpackt `.syh` in eine eigenständige `.py`, kann Dekompilieren und Mehrfachdatei-Builds (siehe [Abschnitt 13](#13-bsyhc--der-compiler)).
-- **Sprachbibliotheken** — `mathlib`, `strlib`, `listlib`, `randlib`, `timelib`: Unterprogramme für Mathematik, Zeichenketten, Listen, Zufall und Zeit (siehe [Abschnitt 14](#14-sprachbibliotheken)).
+- **BSYHC** — der Compiler: `bsyhc.py` verpackt `.syh` in eine eigenständige `.py`, kann Dekompilieren und Mehrfachdatei-Builds (siehe [Abschnitt 14](#14-bsyhc--der-compiler)).
+- **Sprachbibliotheken** — `mathlib`, `strlib`, `listlib`, `randlib`, `timelib`: Unterprogramme für Mathematik, Zeichenketten, Listen, Zufall und Zeit (siehe [Abschnitt 15](#15-sprachbibliotheken)).
 
-## 13. BSYHC — Der Compiler
+## 14. BSYHC — Der Compiler
 
 **BSYHC** (Base SisYpH Compiler, `bsyhc.py`) ist der Compiler der Sprache Sisyph. Er verpackt eine `.syh`-Datei in ein Array, in dem jede neue Zeile ein neues Element des Arrays ist, bettet eine Kopie des Interpreters in die Ausgabedatei ein und führt das Programm direkt aus dem Array aus. Die kompilierte `.py`-Datei ist eigenständig und benötigt kein `main.py` daneben.
 
@@ -384,6 +422,7 @@ Das Programm fragt eine Zeichenkette ab, vergleicht sie mit dem Wort «НИЧЕ�
 | Kompilieren | `python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py` |
 | In ELF kompilieren | `python3 bsyhc.py -i b.syh -c -elf -o b_bin` |
 | In EXE kompilieren | `python3 bsyhc.py -i b.syh -c -exe -o b.exe` |
+| Zwischen-`.py` | `python3 bsyhc.py -i b.syh --py -o app.py` |
 | Dekompilieren | `python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh` |
 | Binärdatei dekompilieren | `python3 bsyhc.py -i b_bin -d -o b-de.syh` |
 | Interpretieren | `python3 bsyhc.py -i b.syh` |
@@ -397,8 +436,10 @@ Wenn nur eine Eingabedatei angegeben wird (ohne `-c` und `-d`), interpretiert BS
 | `-i, --input <datei>` | Eingabedatei; kann wiederholt werden, um mehrere Dateien in eine Ausgabe zu kompilieren |
 | `-o, --output <datei>` | Ausgabedatei (Standard: `<eingabe>.py` / `<eingabe>.syh`) |
 | `-c, --compile` | `.syh` in eine eigenständige `.py` kompilieren |
+| `--py` | nur die intermediate eigenständige `.py`-Datei für eine manuelle PyInstaller-Sammlung erzeugen (gibt den genauen PyInstaller-Befehl aus) |
 | `-elf` | `.syh` über PyInstaller in eine ELF-Binärdatei kompilieren (Linux) |
 | `-exe` | `.syh` über PyInstaller in eine EXE-Binärdatei kompilieren (Windows) |
+| `-k, --keep-intermediate` | beim Erstellen einer Binärdatei (`-c -elf` / `-c -exe`) die intermediate `.py` neben der Binärdatei behalten (als `<ausgabe>.py`) und den PyInstaller-Befehl für die manuelle Neuerstellung ausgeben |
 | `-d, --decompile` | eine kompilierte `.py` (oder BSYHC-Binärdatei) zurück in `.syh` dekompilieren |
 | `--merge concat \| include` | Art der Dateizusammenführung beim Kompilieren (Standard `concat`) |
 | `--split` | beim Dekompilieren jede Quelldatei einzeln wiederherstellen (in das `-o`-Verzeichnis) |
@@ -430,6 +471,21 @@ python3 bsyhc.py -i b.syh -c -exe -o b.exe
 - PyInstaller kann nicht cross-kompilieren: unter Linux erzeugt `-exe` eine native Binärdatei mit dem Namen `*.exe`; eine echte Windows-EXE kann nur unter Windows gebaut werden.
 - Eine von BSYHC gebaute Binärdatei kann zurück in `.syh` dekompiliert werden (siehe unten).
 
+### Intermediate .py (manuelle PyInstaller-Sammlung)
+
+Die Kompilierung mit `-c` erzeugt eine eigenständige `.py` — das ist die Zwischendatei, die PyInstaller für `-elf` / `-exe` in eine Binärdatei verwandelt. Der Modus `--py` erzeugt sie explizit und gibt den PyInstaller-Befehl aus, um die Binärdatei manuell zu bauen:
+
+```
+python3 bsyhc.py -i b.syh --py -o app.py
+pyinstaller --onefile --noconfirm --name app app.py
+```
+
+Bei einer normalen Binär-Sammlung liegt die intermediate `.py` in einem temporären Verzeichnis und wird danach gelöscht. Mit dem Flag `-k` bleibt sie neben der Binärdatei erhalten:
+
+```
+python3 bsyhc.py -i b.syh -c -elf -o b_bin -k   # Binärdatei b_bin + b_bin.py
+```
+
 ### Dekompilieren
 
 Die kompilierte Datei lässt sich leicht dekompilieren — das Programm wird aus dem Array wiederhergestellt:
@@ -446,7 +502,7 @@ Nicht nur `.py`-Dateien, sondern auch gebaute Binärdateien lassen sich dekompil
 python3 bsyhc.py -i b_bin -d -o b-de.syh
 ```
 
-## 14. Sprachbibliotheken
+## 15. Sprachbibliotheken
 
 Die Sprache wird mit Unterprogramm-Bibliotheken ausgeliefert — gewöhnliche `.syh`-Dateien, die mit `include` geladen und über `goto <bibliothek>.<unterprogramm>` aufgerufen werden. Die Dateien liegen im Verzeichnis `lib/` und werden ohne Pfad eingebunden.
 
@@ -456,7 +512,7 @@ Die Sprache wird mit Unterprogramm-Bibliotheken ausgeliefert — gewöhnliche `.
 - Ein Unterprogramm liest seine Eingabevariablen (jede Bibliothek hat ihr eigenes Präfix) und schreibt das Ergebnis in die Variable `<präfix>_result`.
 - Daten werden über globale Variablen übergeben, daher müssen sie vor jedem Aufruf neu gesetzt werden.
 - In Unterprogrammen gibt es keine Schleifen: jedes `goto` legt eine Position auf den Aufrufstapel, eine Schleife im Unterprogramm würde den Stapel also verschmutzen. Wiederholungen werden im Hauptprogramm organisiert.
-- Der BSYHC-Compiler kann Bibliotheken direkt in die kompilierte Datei einbetten — siehe Abschnitt 13, Flag `--merge include`.
+- Der BSYHC-Compiler kann Bibliotheken direkt in die kompilierte Datei einbetten — siehe Abschnitt 14, Flag `--merge include`.
 
 ### Beispiel
 

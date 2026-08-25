@@ -9,9 +9,10 @@ The project ships with **BSYHC** (Base Sisyph Compiler) — a compiler that pack
 - Simple line-oriented syntax: each line is one command
 - Labels (`@name`), unconditional jumps (`goto`), subroutines with a call stack (`goto back`)
 - Single-line conditionals: `if <expression> then <command>`
-- Built-in libraries: `stdlib` (I/O), `v` (types), `file` (files), `pylib` (raw Python)
+- Built-in libraries: `stdlib` (I/O), `v` (types), `file` (files), `pylib` (raw Python), `dc` (data classes)
 - Any Python expression works anywhere: f-strings, comprehensions, `__import__`
-- Comments with `#` (Python comment character)
+- Line comments with `~~` (everything after `~~` is ignored)
+- Multiple commands per line with `;` separator
 - `include` mechanism for reusing code and libraries
 - **BSYHC compiler**: compile to a self-contained `.py` or a binary (ELF/EXE via PyInstaller), decompile back, merge multiple files into one
 - Standard libraries: `mathlib`, `strlib`, `listlib`, `randlib`, `timelib`
@@ -88,7 +89,7 @@ goto end
 exit 0
 ```
 
-Commands: `include`, `goto`, `goto back`, `exit`, `if ... then`, and the built-in libraries `stdlib` (`stdlib.stdout`, `stdlib.stdin`), `v` (`v.int`, `v.str`, `v.float`, `v.bool`, `v.list`), `file` (`file.read/write/append/delete/exists/lines`), `pylib` (direct access to Python).
+Commands: `include`, `goto`, `goto back`, `exit`, `if ... then`, and the built-in libraries `stdlib` (`stdlib.stdout`, `stdlib.stdin`), `v` (`v.int`, `v.str`, `v.float`, `v.bool`, `v.list`), `file` (`file.read/write/append/delete/exists/lines`), `pylib` (direct access to Python), `dc` (`dc.mkdc/set/get/remkey/move/copy/copy2var/move2var` — data classes).
 
 ## Compiler (`bsyhc.py`)
 
@@ -121,9 +122,24 @@ python3 bsyhc.py -i guess.syh -i lib/randlib.syh -i lib/strlib.syh -c --merge in
 python3 guess.py
 ```
 
-Flags: `-i/--input` (repeatable), `-o/--output`, `-c/--compile`, `-d/--decompile`, `-elf` (compile to an ELF binary via PyInstaller on Linux), `-exe` (compile to an EXE binary via PyInstaller on Windows), `--merge concat|include`, `--split` (restore each source file on decompilation).
+Flags: `-i/--input` (repeatable), `-o/--output`, `-c/--compile`, `--py` (generate only the intermediate `.py` for a manual PyInstaller build), `-d/--decompile`, `-elf` (compile to an ELF binary via PyInstaller on Linux), `-exe` (compile to an EXE binary via PyInstaller on Windows), `-k/--keep-intermediate` (keep the intermediate `.py` when building a binary), `--merge concat|include`, `--split` (restore each source file on decompilation).
 
 Binary builds require [PyInstaller](https://pyinstaller.org) (`pip install pyinstaller`; the project's `env/` includes it). The build runs in a temporary directory — `build/`, `dist/`, `*.spec` and the intermediate `.py` are removed automatically, only the final binary remains. PyInstaller cannot cross-compile, so on Linux `-exe` produces a native binary named `*.exe`; a real Windows EXE must be built on Windows. Binaries built by BSYHC can be decompiled back into `.syh` with `-d`.
+
+### Intermediate Python file
+
+`-c` produces a self-contained `.py` — this file *is* the intermediate representation that PyInstaller turns into a binary for `-elf` / `-exe`. Generate it explicitly with `--py` and build the binary yourself, step by step:
+
+```bash
+python3 bsyhc.py -i b.syh --py -o app.py                    # step 1: intermediate .py (prints the PyInstaller command)
+pyinstaller --onefile --noconfirm --name app app.py         # step 2: manual binary build
+```
+
+During a regular `-elf` / `-exe` build the intermediate `.py` lives in a temporary directory and is deleted afterwards. Use `-k` to keep it next to the binary and get the exact rebuild command printed:
+
+```bash
+python3 bsyhc.py -i b.syh -c -elf -o b_bin -k               # builds b_bin and keeps b_bin.py
+```
 
 ## Standard libraries
 

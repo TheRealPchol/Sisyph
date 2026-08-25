@@ -1,24 +1,31 @@
+~~ Импортиркем библиотеки
 include v
 include stdlib
 
+~~ Создаём переменные; ~~ Тест!
 v.str false_o "Ты не угадал("
 v.str true_o "Ты угадал!"
 
+
+~~ Точка входа
 @main
 stdlib.stdin sa "Введите строку: "
 v.str object "НИЧЕГО"
 goto check
 exit 0
 
+~~ Проверка ответа
 @check
 if sa == object then goto true
 if sa != object then goto false
 goto back
 
+~~ Если ответ верен выводим что мы угадали
 @true
 stdlib.stdout true_o 
 goto back
 
+~~ Если ответ неверен выводим что мы не угадали и прыгаеем на точку входа заново(тем самым занова запуская проверку)
 @false
 stdlib.stdout false_o, "\n"
 goto main

@@ -133,6 +133,7 @@
     <li><a href="#v">Die Bibliothek v</a></li>
     <li><a href="#file">Die Bibliothek file</a></li>
     <li><a href="#pylib">Die Bibliothek pylib</a></li>
+    <li><a href="#dc">Die Bibliothek dc</a></li>
     <li><a href="#examples">Beispielprogramme</a></li>
     <li><a href="#limits">Einschränkungen und Besonderheiten</a></li>
     <li><a href="#errors">Fehlermeldungen</a></li>
@@ -164,7 +165,7 @@
 <p>Beispiel:</p>
 <pre><code>python3 main.py a.syh</code></pre>
 <p>Wenn die Datei nicht gefunden wird, gibt der Interpreter eine Fehlermeldung aus und beendet sich.</p>
-<p>Ein Programm kann auch über den BSYHC-Compiler im Interpretationsmodus gestartet werden (siehe <a href="#bsyhc">Abschnitt 13</a>):</p>
+<p>Ein Programm kann auch über den BSYHC-Compiler im Interpretationsmodus gestartet werden (siehe <a href="#bsyhc">Abschnitt 14</a>):</p>
 <pre><code>python3 bsyhc.py -i programm.syh</code></pre>
 
 <h2 id="syntax">3. Syntax</h2>
@@ -178,7 +179,9 @@
 stdlib.stdout "Hallo!"</code></pre>
 <p>Zeilen mit Marken werden bei der Ausführung übersprungen.</p>
 <h3>Kommentare</h3>
-<p>Die Sprache hat keine eigene Kommentarsyntax. Da Ausdrücke von Python verarbeitet werden, kann innerhalb von Ausdrücken das Python-Kommentarzeichen <code>#</code> verwendet werden.</p>
+<p>Die Sprache verwendet <code>~~</code> für Zeilenkommentare. Alles nach <code>~~</code> in einer Zeile wird ignoriert:</p>
+<pre><code>stdlib.stdout "Hallo" ~~ das ist ein Kommentar</code></pre>
+<p>Zusätzlich kann <code>#</code> innerhalb von Python-Ausdrücken verwendet werden.</p>
 <h3>Groß-/Kleinschreibung</h3>
 <p>Befehle unterscheiden Groß- und Kleinschreibung: <code>goto</code> ist ein Befehl, <code>GOTO</code> nicht.</p>
 <h3>Variablen</h3>
@@ -191,7 +194,7 @@ stdlib.stdout "Hallo!"</code></pre>
 <p>Wenn die Datei <code>name.syh</code> existiert, werden ihre Zeilen an das Ende des aktuellen Programms angehängt und die Marken der Datei sind mit dem Präfix <code>name.markierung</code> verfügbar:</p>
 <pre><code>include lib
 goto lib.start</code></pre>
-<p>Wenn die Datei nicht existiert, gilt <code>name</code> als eingebaute Bibliothek. Eingebaute Bibliotheken: <code>stdlib</code>, <code>v</code>, <code>file</code>, <code>pylib</code>.</p>
+<p>Wenn die Datei nicht existiert, gilt <code>name</code> als eingebaute Bibliothek. Eingebaute Bibliotheken: <code>stdlib</code>, <code>v</code>, <code>file</code>, <code>pylib</code>, <code>dc</code>.</p>
 <h3>goto</h3>
 <p>Unbedingter Sprung zu einer Marke:</p>
 <pre><code>goto markierung</code></pre>
@@ -292,7 +295,31 @@ file.exists ok "data.txt"</code></pre>
 pylib.set x m.sqrt(16)
 pylib.print x</code></pre>
 
-<h2 id="examples">9. Beispielprogramme</h2>
+<h2 id="dc">9. Die Bibliothek dc</h2>
+<p>Für die Verwendung: <code>include dc</code> einfügen.</p>
+<p>Die Bibliothek implementiert Datenklassen — benannte Wörterbücher mit Schlüssel-Wert-Paaren.</p>
+<table>
+  <tr><th>Befehl</th><th>Zweck</th></tr>
+  <tr><td><code>dc.mkdc &lt;name&gt;</code></td><td>erstellt eine neue leere Datenklasse</td></tr>
+  <tr><td><code>dc.set &lt;name&gt;(&lt;schlüssel&gt; :: &lt;wert&gt;)</code></td><td>setzt ein Schlüssel-Wert-Paar in der Datenklasse</td></tr>
+  <tr><td><code>dc.get &lt;variable&gt; &lt;name&gt;(&lt;schlüssel&gt;)</code></td><td>liest den Wert eines Schlüssels und speichert ihn in einer Variablen</td></tr>
+  <tr><td><code>dc.remkey &lt;name&gt; &lt;schlüssel&gt;</code></td><td>entfernt einen Schlüssel aus der Datenklasse</td></tr>
+  <tr><td><code>dc.move FROMDC(KEY) TODC(KEY)</code></td><td>verschiebt einen Schlüssel von einer Datenklasse zur anderen (Quelle wird gelöscht)</td></tr>
+  <tr><td><code>dc.copy FROMDC(KEY) TODC(KEY)</code></td><td>kopiert einen Schlüssel von einer Datenklasse zur anderen (Quelle bleibt erhalten)</td></tr>
+  <tr><td><code>dc.copy2var &lt;variable&gt; &lt;name&gt;(&lt;key&gt;)</code></td><td>kopiert den Wert eines Datenklassen-Schlüssels in eine Variable</td></tr>
+  <tr><td><code>dc.move2var &lt;variable&gt; &lt;name&gt;(&lt;key&gt;)</code></td><td>verschiebt den Wert eines Datenklassen-Schlüssels in eine Variable (Schlüssel wird gelöscht)</td></tr>
+</table>
+<p>Syntax:</p>
+<pre><code>dc.mkdc a
+dc.mkdc b
+dc.set a(name :: "Alice")
+dc.move a(name) b(name)
+dc.copy b(name) a(name2)
+dc.copy2var myvar b(name)
+dc.move2var myvar2 a(name2)</code></pre>
+<p>Der Wert in <code>dc.set</code> wird als Python-Ausdruck ausgewertet. Bei Auswertungsfehlung wird der rohe String verwendet.</p>
+
+<h2 id="examples">10. Beispielprogramme</h2>
 <h3>Beispiel 1. Listen und Typkonvertierung (<code>a.syh</code>)</h3>
 <pre><code>include v
 include stdlib
@@ -340,7 +367,7 @@ stdlib.stdout false_o, "\n"
 goto main</code></pre>
 <p>Das Programm fragt eine Zeichenkette ab, vergleicht sie mit dem Wort «НИЧЕГО» und gibt das Ergebnis aus. Die Unterprogramme <code>@true</code> und <code>@false</code> kehren über <code>goto back</code> zurück.</p>
 
-<h2 id="limits">10. Einschränkungen und Besonderheiten</h2>
+<h2 id="limits">11. Einschränkungen und Besonderheiten</h2>
 <ul>
   <li><strong>Keine Schleifen.</strong> Wiederholungen werden ausschließlich über <code>goto</code> organisiert.</li>
   <li><strong>Keine Funktionen.</strong> Marken mit <code>goto</code> / <code>goto back</code> dienen als Unterprogramme.</li>
@@ -353,7 +380,7 @@ goto main</code></pre>
   <li><strong><code>include</code> fügt Code ein.</strong> Die eingebundene Datei wird an das aktuelle Programm angehängt und beim Erreichen ausgeführt.</li>
 </ul>
 
-<h2 id="errors">11. Fehlermeldungen</h2>
+<h2 id="errors">12. Fehlermeldungen</h2>
 <table>
   <tr><th>Meldung</th><th>Situation</th></tr>
   <tr><td><code>Sisyph Error: File '&lt;name&gt;' not found.</code></td><td>die Programmdatei wurde nicht gefunden</td></tr>
@@ -365,17 +392,17 @@ goto main</code></pre>
   <tr><td><code>The program terminated with code "&lt;code&gt;"</code></td><td>Beendigung mit einem Code</td></tr>
 </table>
 
-<h2 id="ecosystem">12. Ökosystem</h2>
+<h2 id="ecosystem">13. Ökosystem</h2>
 <ul>
   <li><strong><code>.syh</code>-Dateien</strong> — Programme und Bibliotheken.</li>
   <li><strong><code>include</code></strong> — der Wiederverwendungsmechanismus: Marken fremder Dateien werden mit dem Präfix des Dateinamens aufgerufen (<code>name.markierung</code>).</li>
-  <li><strong>Eingebaute Bibliotheken</strong> — <code>stdlib</code> (Ein-/Ausgabe), <code>v</code> (Typen), <code>file</code> (Dateien), <code>pylib</code> (Python).</li>
+  <li><strong>Eingebaute Bibliotheken</strong> — <code>stdlib</code> (Ein-/Ausgabe), <code>v</code> (Typen), <code>file</code> (Dateien), <code>pylib</code> (Python), <code>dc</code> (Datenklassen).</li>
   <li><strong><code>pylib</code></strong> — der Erweiterungspunkt: beliebiger Python-Code ist aus Sisyph erreichbar, ohne den Interpreter zu ändern.</li>
-  <li><strong>BSYHC</strong> — der Compiler: <code>bsyhc.py</code> verpackt <code>.syh</code> in eine eigenständige <code>.py</code>, kann Dekompilieren und Mehrfachdatei-Builds (siehe <a href="#bsyhc">Abschnitt 13</a>).</li>
-  <li><strong>Sprachbibliotheken</strong> — <code>mathlib</code>, <code>strlib</code>, <code>listlib</code>, <code>randlib</code>, <code>timelib</code>: Unterprogramme für Mathematik, Zeichenketten, Listen, Zufall und Zeit (siehe <a href="#libs">Abschnitt 14</a>).</li>
+  <li><strong>BSYHC</strong> — der Compiler: <code>bsyhc.py</code> verpackt <code>.syh</code> in eine eigenständige <code>.py</code>, kann Dekompilieren und Mehrfachdatei-Builds (siehe <a href="#bsyhc">Abschnitt 14</a>).</li>
+  <li><strong>Sprachbibliotheken</strong> — <code>mathlib</code>, <code>strlib</code>, <code>listlib</code>, <code>randlib</code>, <code>timelib</code>: Unterprogramme für Mathematik, Zeichenketten, Listen, Zufall und Zeit (siehe <a href="#libs">Abschnitt 15</a>).</li>
 </ul>
 
-<h2 id="libs">14. Sprachbibliotheken</h2>
+<h2 id="libs">15. Sprachbibliotheken</h2>
 <p>Die Sprache wird mit Unterprogramm-Bibliotheken ausgeliefert — gewöhnliche <code>.syh</code>-Dateien, die mit <code>include</code> geladen und über <code>goto &lt;bibliothek&gt;.&lt;unterprogramm&gt;</code> aufgerufen werden. Die Dateien liegen im Verzeichnis <code>lib/</code> und werden ohne Pfad eingebunden.</p>
 <h3>Konventionen</h3>
 <ul>
@@ -453,7 +480,7 @@ exit 0</code></pre>
   <tr><td><code>timelib.sleep</code></td><td><code>tl_sec</code></td><td>—</td><td>Ausführung für die angegebene Anzahl Sekunden pausieren</td></tr>
 </table>
 
-<h2 id="bsyhc">13. BSYHC — Der Compiler</h2>
+<h2 id="bsyhc">14. BSYHC — Der Compiler</h2>
 <p><strong>BSYHC</strong> (Base SisYpH Compiler, <code>bsyhc.py</code>) ist der Compiler der Sprache Sisyph. Er verpackt eine <code>.syh</code>-Datei in ein Array, in dem jede neue Zeile ein neues Element des Arrays ist, bettet eine Kopie des Interpreters in die Ausgabedatei ein und führt das Programm direkt aus dem Array aus. Die kompilierte <code>.py</code>-Datei ist eigenständig und benötigt kein <code>main.py</code> daneben.</p>
 <h3>Arbeitsmodi</h3>
 <table>
@@ -461,6 +488,7 @@ exit 0</code></pre>
   <tr><td>Kompilieren</td><td><code>python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py</code></td></tr>
   <tr><td>In ELF kompilieren</td><td><code>python3 bsyhc.py -i b.syh -c -elf -o b_bin</code></td></tr>
   <tr><td>In EXE kompilieren</td><td><code>python3 bsyhc.py -i b.syh -c -exe -o b.exe</code></td></tr>
+  <tr><td>Zwischen-<code>.py</code></td><td><code>python3 bsyhc.py -i b.syh --py -o app.py</code></td></tr>
   <tr><td>Dekompilieren</td><td><code>python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh</code></td></tr>
   <tr><td>Binärdatei dekompilieren</td><td><code>python3 bsyhc.py -i b_bin -d -o b-de.syh</code></td></tr>
   <tr><td>Interpretieren</td><td><code>python3 bsyhc.py -i b.syh</code></td></tr>
@@ -472,8 +500,10 @@ exit 0</code></pre>
   <tr><td><code>-i, --input &lt;datei&gt;</code></td><td>Eingabedatei; kann wiederholt werden, um mehrere Dateien in eine Ausgabe zu kompilieren</td></tr>
   <tr><td><code>-o, --output &lt;datei&gt;</code></td><td>Ausgabedatei (Standard: <code>&lt;eingabe&gt;.py</code> / <code>&lt;eingabe&gt;.syh</code>)</td></tr>
   <tr><td><code>-c, --compile</code></td><td><code>.syh</code> in eine eigenständige <code>.py</code> kompilieren</td></tr>
+  <tr><td><code>--py</code></td><td>nur die intermediate eigenständige <code>.py</code>-Datei für eine manuelle PyInstaller-Sammlung erzeugen (gibt den genauen PyInstaller-Befehl aus)</td></tr>
   <tr><td><code>-elf</code></td><td><code>.syh</code> über PyInstaller in eine ELF-Binärdatei kompilieren (Linux)</td></tr>
   <tr><td><code>-exe</code></td><td><code>.syh</code> über PyInstaller in eine EXE-Binärdatei kompilieren (Windows)</td></tr>
+  <tr><td><code>-k, --keep-intermediate</code></td><td>beim Erstellen einer Binärdatei (<code>-c -elf</code> / <code>-c -exe</code>) die intermediate <code>.py</code> neben der Binärdatei behalten (als <code>&lt;ausgabe&gt;.py</code>) und den PyInstaller-Befehl für die manuelle Neuerstellung ausgeben</td></tr>
   <tr><td><code>-d, --decompile</code></td><td>eine kompilierte <code>.py</code> (oder BSYHC-Binärdatei) zurück in <code>.syh</code> dekompilieren</td></tr>
   <tr><td><code>--merge concat | include</code></td><td>Art der Dateizusammenführung beim Kompilieren (Standard <code>concat</code>)</td></tr>
   <tr><td><code>--split</code></td><td>beim Dekompilieren jede Quelldatei einzeln wiederherstellen (in das <code>-o</code>-Verzeichnis)</td></tr>
@@ -497,6 +527,12 @@ python3 bsyhc.py -i b.syh -c -exe -o b.exe</code></pre>
   <li>PyInstaller kann nicht cross-kompilieren: unter Linux erzeugt <code>-exe</code> eine native Binärdatei mit dem Namen <code>*.exe</code>; eine echte Windows-EXE kann nur unter Windows gebaut werden.</li>
   <li>Eine von BSYHC gebaute Binärdatei kann zurück in <code>.syh</code> dekompiliert werden (siehe unten).</li>
 </ul>
+<h3>Intermediate .py (manuelle PyInstaller-Sammlung)</h3>
+<p>Die Kompilierung mit <code>-c</code> erzeugt eine eigenständige <code>.py</code> — das ist die Zwischendatei, die PyInstaller für <code>-elf</code> / <code>-exe</code> in eine Binärdatei verwandelt. Der Modus <code>--py</code> erzeugt sie explizit und gibt den PyInstaller-Befehl aus, um die Binärdatei manuell zu bauen:</p>
+<pre><code>python3 bsyhc.py -i b.syh --py -o app.py
+pyinstaller --onefile --noconfirm --name app app.py</code></pre>
+<p>Bei einer normalen Binär-Sammlung liegt die intermediate <code>.py</code> in einem temporären Verzeichnis und wird danach gelöscht. Mit dem Flag <code>-k</code> bleibt sie neben der Binärdatei erhalten:</p>
+<pre><code>python3 bsyhc.py -i b.syh -c -elf -o b_bin -k   # b_bin + b_bin.py</code></pre>
 <h3>Dekompilieren</h3>
 <p>Die kompilierte Datei lässt sich leicht dekompilieren — das Programm wird aus dem Array wiederhergestellt:</p>
 <pre><code>python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh</code></pre>

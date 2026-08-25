@@ -22,12 +22,13 @@ mientras que todo el cálculo se delega al intérprete de Python.
  6. La biblioteca v
  7. La biblioteca file
  8. La biblioteca pylib
- 9. Programas de ejemplo
- 10. Limitaciones y particularidades
- 11. Mensajes de error
- 12. Ecosistema
- 13. BSYHC — El compilador
- 14. Bibliotecas del lenguaje
+ 9. La biblioteca dc
+ 10. Programas de ejemplo
+ 11. Limitaciones y particularidades
+ 12. Mensajes de error
+ 13. Ecosistema
+ 14. BSYHC — El compilador
+ 15. Bibliotecas del lenguaje
 
 --------------------------------------------------------------------------------
 1. SOBRE EL LENGUAJE
@@ -54,7 +55,7 @@ Ejemplo:
 Si el archivo no existe, el intérprete imprime un mensaje de error y termina.
 
 Un programa también se puede ejecutar a través del compilador BSYHC en modo de
-interpretación (véase la sección 13):
+interpretación (véase la sección 14):
 
     python3 bsyhc.py -i programa.syh
 
@@ -80,9 +81,12 @@ Etiquetas:
     Las líneas que contienen etiquetas se omiten durante la ejecución.
 
 Comentarios:
-    El lenguaje no tiene sintaxis propia de comentarios. Como las expresiones
-    las procesa Python, dentro de las expresiones se puede usar el carácter
-    de comentario # de Python.
+    El lenguaje usa ~~ para comentarios de línea. Todo lo que va después de
+    ~~ en una línea se ignora:
+
+        stdlib.stdout "hola" ~~ esto es un comentario
+
+    Además, # se puede usar dentro de expresiones de Python.
 
 Sensibilidad a mayúsculas:
     Los comandos distinguen mayúsculas de minúsculas: goto es un comando,
@@ -109,7 +113,7 @@ include
         goto lib.start
 
     Si el archivo no existe, nombre se considera una biblioteca incorporada.
-    Bibliotecas incorporadas: stdlib, v, file, pylib.
+    Bibliotecas incorporadas: stdlib, v, file, pylib, dc.
 
 goto
     Salto incondicional a una etiqueta:
@@ -255,7 +259,37 @@ Ejemplo:
     pylib.print x
 
 --------------------------------------------------------------------------------
-9. PROGRAMAS DE EJEMPLO
+9. LA BIBLIOTECA DC
+--------------------------------------------------------------------------------
+Para usar, incluya include dc.
+
+La biblioteca implementa clases de datos — diccionarios con nombre que
+almacenan pares clave-valor.
+
+    dc.mkdc <nombre>                              crea una nueva clase de datos vacía
+    dc.set <nombre>(<clave> :: <valor>)            establece un par clave-valor
+    dc.get <variable> <nombre>(<clave>)            obtiene el valor de una clave
+    dc.remkey <nombre> <clave>                     elimina una clave
+    dc.move FROMDC(KEY) TODC(KEY)                  mueve una clave de una clase a otra (eliminando del origen)
+    dc.copy FROMDC(KEY) TODC(KEY)                  copia una clave de una clase a otra (el origen se mantiene)
+    dc.copy2var <variable> <nombre>(<clave>)        copia el valor de una clave a una variable
+    dc.move2var <variable> <nombre>(<clave>)        mueve el valor de una clave a una variable (la clave se elimina)
+
+Sintaxis:
+
+    dc.mkdc a
+    dc.mkdc b
+    dc.set a(name :: "Alice")
+    dc.move a(name) b(name)
+    dc.copy b(name) a(name2)
+    dc.copy2var myvar b(name)
+    dc.move2var myvar2 a(name2)
+
+El valor en dc.set se evalúa como expresión de Python. Si la evaluación falla,
+se usa el string sin procesar.
+
+--------------------------------------------------------------------------------
+10. PROGRAMAS DE EJEMPLO
 --------------------------------------------------------------------------------
 Ejemplo 1. Listas y conversión de tipos (a.syh)
 
@@ -312,7 +346,7 @@ El programa pide una cadena, la compara con la palabra "НИЧЕГО" e imprime 
 resultado. Las subrutinas @true y @false regresan mediante goto back.
 
 --------------------------------------------------------------------------------
-10. LIMITACIONES Y PARTICULARIDADES
+11. LIMITACIONES Y PARTICULARIDADES
 --------------------------------------------------------------------------------
 - Sin bucles. La repetición se organiza únicamente con goto.
 - Sin funciones. Las etiquetas con goto / goto back actúan como subrutinas.
@@ -331,7 +365,7 @@ resultado. Las subrutinas @true y @false regresan mediante goto back.
   se ejecuta al alcanzarse.
 
 --------------------------------------------------------------------------------
-11. MENSAJES DE ERROR
+12. MENSAJES DE ERROR
 --------------------------------------------------------------------------------
 Sisyph Error: File '<nombre>' not found.
         no se encontró el archivo del programa
@@ -355,23 +389,23 @@ The program terminated with code "<código>"
         terminación con un código
 
 --------------------------------------------------------------------------------
-12. ECOSISTEMA
+13. ECOSISTEMA
 --------------------------------------------------------------------------------
 - Archivos .syh — programas y bibliotecas.
 - include — el mecanismo de reutilización: las etiquetas de otros archivos se
   llaman con el prefijo del nombre del archivo (nombre.etiqueta).
 - Bibliotecas incorporadas — stdlib (entrada/salida), v (tipos), file
-  (archivos), pylib (Python).
+  (archivos), pylib (Python), dc (clases de datos).
 - pylib — el punto de extensión: cualquier código de Python es alcanzable
   desde Sisyph sin modificar el intérprete.
 - BSYHC — el compilador: bsyhc.py empaqueta .syh en un .py autónomo, permite
-  descompilar y la compilación de varios archivos (véase la sección 13).
+  descompilar y la compilación de varios archivos (véase la sección 14).
 - Bibliotecas del lenguaje — mathlib, strlib, listlib, randlib, timelib:
   subrutinas para matemáticas, cadenas, listas, aleatoriedad y tiempo
-  (véase la sección 14).
+  (véase la sección 15).
 
 --------------------------------------------------------------------------------
-14. BIBLIOTECAS DEL LENGUAJE
+15. BIBLIOTECAS DEL LENGUAJE
 --------------------------------------------------------------------------------
 El lenguaje incluye bibliotecas de subrutinas — archivos .syh ordinarios que
 se cargan con include y se invocan mediante
@@ -389,7 +423,7 @@ Convenciones:
       la pila de llamadas, así que un bucle dentro de una subrutina ensuciaría
       la pila. La repetición se organiza en el código del programa principal.
     - El compilador BSYHC puede incrustar bibliotecas directamente en el
-      archivo compilado — véase la sección 13, la bandera --merge include.
+      archivo compilado — véase la sección 14, la bandera --merge include.
 
 Ejemplo:
 
@@ -456,7 +490,7 @@ lib/timelib.syh — tiempo (prefijo tl_):
     timelib.sleep       tl_sec                     -> —          pausa por segundos
 
 --------------------------------------------------------------------------------
-13. BSYHC — EL COMPILADOR
+14. BSYHC — EL COMPILADOR
 --------------------------------------------------------------------------------
 BSYHC (Base SisYpH Compiler, bsyhc.py) es el compilador del lenguaje Sisyph.
 Empaqueta un archivo .syh en un array en el que cada nueva línea es un nuevo
@@ -469,6 +503,7 @@ Modos de trabajo:
     Compilar          python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py
     Compilar a ELF    python3 bsyhc.py -i b.syh -c -elf -o b_bin
     Compilar a EXE    python3 bsyhc.py -i b.syh -c -exe -o b.exe
+    .py intermedio  python3 bsyhc.py -i b.syh --py -o app.py
     Descompilar       python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
     Descompilar binario python3 bsyhc.py -i b_bin -d -o b-de.syh
     Interpretar       python3 bsyhc.py -i b.syh
@@ -483,10 +518,17 @@ Banderas:
     -o, --output <archivo>   archivo de salida (por defecto: <entrada>.py /
                              <entrada>.syh)
     -c, --compile            compilar .syh en un .py autónomo
+    --py                     generar solo el .py autónomo intermedio para una
+                             compilación manual con PyInstaller (imprime el
+                             comando exacto de PyInstaller)
     -elf                     compilar .syh en un binario ELF mediante
                              PyInstaller (Linux)
     -exe                     compilar .syh en un binario EXE mediante
                              PyInstaller (Windows)
+    -k, --keep-intermediate  al compilar un binario (-c -elf / -c -exe),
+                             conservar el .py intermedio junto al binario (como
+                             <salida>.py) e imprimir el comando de PyInstaller
+                             para recompilar manualmente
     -d, --decompile          descompilar un .py compilado (o un binario BSYHC)
                              de vuelta a .syh
     --merge concat|include   forma de fusionar archivos al compilar
@@ -525,6 +567,23 @@ Compilar a un binario (ELF / EXE):
     compilarse en Windows.
     Un binario compilado por BSYHC puede descompilarse de vuelta a .syh
     (ver más abajo).
+
+
+.py intermedio (compilación manual con PyInstaller):
+
+    La compilación con -c produce un .py autónomo: esta es la representación
+    intermedia que PyInstaller convierte en un binario para -elf / -exe. El
+    modo --py la genera explícitamente e imprime el comando de PyInstaller
+    para que puedas compilar el binario a mano:
+
+        python3 bsyhc.py -i b.syh --py -o app.py
+        pyinstaller --onefile --noconfirm --name app app.py
+
+    Durante una compilación de binario normal, el .py intermedio vive en un
+    directorio temporal y se elimina después. El flag -k lo conserva junto
+    al binario:
+
+        python3 bsyhc.py -i b.syh -c -elf -o b_bin -k   # b_bin + b_bin.py
 
 Descompilación:
 

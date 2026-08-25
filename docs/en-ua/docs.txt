@@ -22,12 +22,13 @@ TABLE OF CONTENTS
  6. The v Library
  7. The file Library
  8. The pylib Library
- 9. Example Programs
- 10. Limitations and Peculiarities
- 11. Error Messages
- 12. Ecosystem
- 13. BSYHC — The Compiler
- 14. Language Libraries
+ 9. The dc Library
+ 10. Example Programs
+ 11. Limitations and Peculiarities
+ 12. Error Messages
+ 13. Ecosystem
+ 14. BSYHC — The Compiler
+ 15. Language Libraries
 
 --------------------------------------------------------------------------------
 1. ABOUT THE LANGUAGE
@@ -54,7 +55,7 @@ Example:
 If the file is not found, the interpreter prints an error message and stops.
 
 The program can also be run through the BSYHC compiler in interpret mode
-(see section 13):
+(see section 14):
 
     python3 bsyhc.py -i program.syh
 
@@ -79,9 +80,12 @@ Labels:
     Lines containing labels are skipped during execution.
 
 Comments:
-    The language has no dedicated comment syntax. Since expressions are
-    processed by Python, you can use the Python comment character # inside
-    expressions.
+    The language uses ~~ for line comments. Everything after ~~ on a line is
+    ignored:
+
+        stdlib.stdout "hello" ~~ this is a comment
+
+    Additionally, # can be used inside Python expressions.
 
 Case sensitivity:
     Commands are case-sensitive: goto is a command, GOTO is not.
@@ -107,7 +111,7 @@ include
         goto lib.start
 
     If the file does not exist, name is treated as a built-in library.
-    Built-in libraries: stdlib, v, file, pylib.
+    Built-in libraries: stdlib, v, file, pylib, dc.
 
 goto
     Unconditional jump to a label:
@@ -252,7 +256,42 @@ Example:
     pylib.print x
 
 --------------------------------------------------------------------------------
-9. EXAMPLE PROGRAMS
+9. THE DC LIBRARY
+--------------------------------------------------------------------------------
+Add to use it: include dc
+
+The library implements data classes — named dictionaries that store key-value
+pairs.
+
+    dc.mkdc <name>                           creates a new empty data class
+    dc.set <name>(<key> :: <value>)           sets a key-value pair in the data class
+    dc.get <variable> <name>(<key>)           retrieves the value of a key and stores
+                                              it in a variable
+    dc.remkey <name> <key>                    removes a key from the data class
+    dc.move FROMDC(KEY) TODC(KEY)             moves a key from one data class to another
+                                              (removing from source)
+    dc.copy FROMDC(KEY) TODC(KEY)             copies a key from one data class to another
+                                              (source is kept)
+    dc.copy2var <variable> <name>(<key>)      copies the value of a data class key to a
+                                              variable
+    dc.move2var <variable> <name>(<key>)      moves the value of a data class key to a
+                                              variable (key is removed)
+
+Syntax:
+
+    dc.mkdc a
+    dc.mkdc b
+    dc.set a(name :: "Alice")
+    dc.move a(name) b(name)
+    dc.copy b(name) a(name2)
+    dc.copy2var myvar b(name)
+    dc.move2var myvar2 a(name2)
+
+The value in dc.set is evaluated as a Python expression. If evaluation fails,
+the raw string is used.
+
+--------------------------------------------------------------------------------
+10. EXAMPLE PROGRAMS
 --------------------------------------------------------------------------------
 Example 1. Lists and type conversion (a.syh)
 
@@ -309,7 +348,7 @@ The program asks for a string, compares it with the word "НИЧЕГО" and prin
 the result. The subroutines @true and @false return via goto back.
 
 --------------------------------------------------------------------------------
-10. LIMITATIONS AND PECULIARITIES
+11. LIMITATIONS AND PECULIARITIES
 --------------------------------------------------------------------------------
 - No loops. Repetition is organized solely through goto.
 - No functions. Labels with goto / goto back serve as subroutines.
@@ -326,7 +365,7 @@ the result. The subroutines @true and @false return via goto back.
   and executed when reached.
 
 --------------------------------------------------------------------------------
-11. ERROR MESSAGES
+12. ERROR MESSAGES
 --------------------------------------------------------------------------------
 Sisyph Error: File '<name>' not found.
         the program file was not found
@@ -350,23 +389,128 @@ The program terminated with code "<code>"
         termination with a code
 
 --------------------------------------------------------------------------------
-12. ECOSYSTEM
+13. ECOSYSTEM
 --------------------------------------------------------------------------------
 - .syh files — programs and libraries.
 - include — the reuse mechanism: labels of other files are called with the
   file-name prefix (name.label).
 - Built-in libraries — stdlib (input/output), v (types), file (files),
-  pylib (Python).
+  pylib (Python), dc (data classes).
 - pylib — the extension point: any Python code is reachable from Sisyph
   without modifying the interpreter.
 - BSYHC — the compiler: bsyhc.py packs .syh into a self-contained .py,
-  supports decompilation and multi-file building (see section 13).
+  supports decompilation and multi-file building (see section 14).
 - Language libraries — mathlib, strlib, listlib, randlib, timelib:
   subroutines for mathematics, strings, lists, randomness and time
-  (see section 14).
+  (see section 15).
 
 --------------------------------------------------------------------------------
-14. LANGUAGE LIBRARIES
+14. BSYHC — THE COMPILER
+--------------------------------------------------------------------------------
+BSYHC (Base SisYpH Compiler, bsyhc.py) is the Sisyph compiler. It packs a .syh
+file into an array in which every new line is a new element of the array, embeds
+a copy of the interpreter into the output file and then runs the program
+straight from the array. The compiled .py file is self-contained and does not
+require main.py next to it.
+
+Modes:
+
+    Compile          python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py
+    Compile to ELF   python3 bsyhc.py -i b.syh -c -elf -o b_bin
+    Compile to EXE   python3 bsyhc.py -i b.syh -c -exe -o b.exe
+    Intermediate .py python3 bsyhc.py -i b.syh --py -o app.py
+    Decompile        python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
+    Decompile binary python3 bsyhc.py -i b_bin -d -o b-de.syh
+    Interpret        python3 bsyhc.py -i b.syh
+
+If only an input file is given (without -c and -d), BSYHC simply interprets the
+program, just like main.py.
+
+Flags:
+
+    -i, --input <file>    input file; may be repeated to compile several files
+                          into one output
+    -o, --output <file>   output file (default: <input>.py / <input>.syh)
+    -c, --compile         compile .syh into a self-contained .py
+    --py                  generate only the intermediate self-contained .py
+                          for a manual PyInstaller build (prints the exact
+                          PyInstaller command)
+    -elf                  compile .syh into an ELF binary via PyInstaller
+                          (Linux)
+    -exe                  compile .syh into an EXE binary via PyInstaller
+                          (Windows)
+    -k, --keep-intermediate  when building a binary (-c -elf / -c -exe), keep
+                          the intermediate .py next to the binary (as
+                          <output>.py) and print the PyInstaller command for
+                          a manual rebuild
+    -d, --decompile       decompile a compiled .py (or a BSYHC binary) back
+                          into .syh
+    --merge concat|include  how to merge files when compiling (default concat)
+    --split               on decompilation, restore each source file separately
+                          (into the -o directory)
+
+Compiling several files:
+
+    -i may be repeated — all files are collected into a single output:
+
+        python3 bsyhc.py -i main.syh -i lib.syh -c -o program.py
+
+    --merge concat    the lines of the files are simply joined in order.
+    --merge include   the first file is the entry point, the rest are appended
+                      as with include: their labels get the prefix file.label
+                      (for example, goto lib.start).
+
+Compiling to a binary (ELF / EXE):
+
+    BSYHC can also build the program into a binary file via PyInstaller
+    (--onefile):
+
+        python3 bsyhc.py -i b.syh -c -elf -o b_bin
+        python3 bsyhc.py -i b.syh -c -exe -o b.exe
+
+    -elf    an ELF binary (built on Linux).
+    -exe    an EXE binary (built on Windows).
+    PyInstaller must be installed (pip install pyinstaller); the project can use
+    its own env/ environment.
+    The build runs in a temporary directory: build/, dist/, *.spec and the
+    intermediate .py are removed automatically — only the final binary remains.
+    PyInstaller cannot cross-compile: on Linux -exe produces a native binary
+    named *.exe; a real Windows EXE can only be built on Windows.
+    A binary built by BSYHC can be decompiled back into .syh (see below).
+
+Intermediate .py (manual PyInstaller build):
+
+    Compiling with -c produces a self-contained .py — this is the intermediate
+    representation that PyInstaller turns into a binary for -elf / -exe. The
+    --py mode generates it explicitly and prints the PyInstaller command so
+    you can build the binary by hand:
+
+        python3 bsyhc.py -i b.syh --py -o app.py
+        pyinstaller --onefile --noconfirm --name app app.py
+
+    During a regular binary build the intermediate .py lives in a temporary
+    directory and is deleted afterwards. The -k flag keeps it next to the
+    binary:
+
+        python3 bsyhc.py -i b.syh -c -elf -o b_bin -k   # b_bin + b_bin.py
+
+Decompilation:
+
+    The compiled file is easy to decompile — the program is restored from the
+    array:
+
+        python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
+
+    By default a single merged .syh is produced. With the --split flag every
+    source file is restored separately into the directory given via -o.
+
+    Not only .py files but also built binaries can be decompiled — BSYHC
+    recovers the source array from the code embedded in the binary:
+
+        python3 bsyhc.py -i b_bin -d -o b-de.syh
+
+--------------------------------------------------------------------------------
+15. LANGUAGE LIBRARIES
 --------------------------------------------------------------------------------
 The language ships with subroutine libraries — ordinary .syh files that are
 loaded with include and called via goto <library>.<subroutine>. The files
@@ -383,7 +527,7 @@ Conventions:
       the call stack, so a loop inside a subroutine would clutter the stack.
       Repetition is organized in the main program code.
     - The BSYHC compiler can embed libraries directly into the compiled file —
-      see section 13, the --merge include flag.
+      see section 14, the --merge include flag.
 
 Example:
 
@@ -448,87 +592,6 @@ lib/timelib.syh — time (prefix tl_):
     timelib.now         —                          -> tl_result  current timestamp
     timelib.strftime    tl_fmt                     -> tl_result  current time by format
     timelib.sleep       tl_sec                     -> —          pause for seconds
-
---------------------------------------------------------------------------------
-13. BSYHC — THE COMPILER
---------------------------------------------------------------------------------
-BSYHC (Base SisYpH Compiler, bsyhc.py) is the Sisyph compiler. It packs a .syh
-file into an array in which every new line is a new element of the array, embeds
-a copy of the interpreter into the output file and then runs the program
-straight from the array. The compiled .py file is self-contained and does not
-require main.py next to it.
-
-Modes:
-
-    Compile          python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py
-    Compile to ELF   python3 bsyhc.py -i b.syh -c -elf -o b_bin
-    Compile to EXE   python3 bsyhc.py -i b.syh -c -exe -o b.exe
-    Decompile        python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
-    Decompile binary python3 bsyhc.py -i b_bin -d -o b-de.syh
-    Interpret        python3 bsyhc.py -i b.syh
-
-If only an input file is given (without -c and -d), BSYHC simply interprets the
-program, just like main.py.
-
-Flags:
-
-    -i, --input <file>    input file; may be repeated to compile several files
-                          into one output
-    -o, --output <file>   output file (default: <input>.py / <input>.syh)
-    -c, --compile         compile .syh into a self-contained .py
-    -elf                  compile .syh into an ELF binary via PyInstaller
-                          (Linux)
-    -exe                  compile .syh into an EXE binary via PyInstaller
-                          (Windows)
-    -d, --decompile       decompile a compiled .py (or a BSYHC binary) back
-                          into .syh
-    --merge concat|include  how to merge files when compiling (default concat)
-    --split               on decompilation, restore each source file separately
-                          (into the -o directory)
-
-Compiling several files:
-
-    -i may be repeated — all files are collected into a single output:
-
-        python3 bsyhc.py -i main.syh -i lib.syh -c -o program.py
-
-    --merge concat    the lines of the files are simply joined in order.
-    --merge include   the first file is the entry point, the rest are appended
-                      as with include: their labels get the prefix file.label
-                      (for example, goto lib.start).
-
-Compiling to a binary (ELF / EXE):
-
-    BSYHC can also build the program into a binary file via PyInstaller
-    (--onefile):
-
-        python3 bsyhc.py -i b.syh -c -elf -o b_bin
-        python3 bsyhc.py -i b.syh -c -exe -o b.exe
-
-    -elf    an ELF binary (built on Linux).
-    -exe    an EXE binary (built on Windows).
-    PyInstaller must be installed (pip install pyinstaller); the project can use
-    its own env/ environment.
-    The build runs in a temporary directory: build/, dist/, *.spec and the
-    intermediate .py are removed automatically — only the final binary remains.
-    PyInstaller cannot cross-compile: on Linux -exe produces a native binary
-    named *.exe; a real Windows EXE can only be built on Windows.
-    A binary built by BSYHC can be decompiled back into .syh (see below).
-
-Decompilation:
-
-    The compiled file is easy to decompile — the program is restored from the
-    array:
-
-        python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
-
-    By default a single merged .syh is produced. With the --split flag every
-    source file is restored separately into the directory given via -o.
-
-    Not only .py files but also built binaries can be decompiled — BSYHC
-    recovers the source array from the code embedded in the binary:
-
-        python3 bsyhc.py -i b_bin -d -o b-de.syh
 
 --------------------------------------------------------------------------------
 © Sisyph Language. Documentation corresponds to the main.py interpreter and the

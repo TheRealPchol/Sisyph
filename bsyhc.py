@@ -6,6 +6,8 @@
 #   Compile:        python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py
 #   Compile to ELF: python3 bsyhc.py -i b.syh -c -elf -o b_bin
 #   Compile to EXE: python3 bsyhc.py -i b.syh -c -exe -o b.exe
+#   Intermediate:   python3 bsyhc.py -i b.syh --py -o app.py
+#   Keep intermediate: python3 bsyhc.py -i b.syh -c -elf -o b_bin -k
 #   Decompile:      python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh
 #   Decompile bin:  python3 bsyhc.py -i b_bin -d -o b-de.syh
 #   Interpret:      python3 bsyhc.py -i b.syh
@@ -14,8 +16,10 @@
 #   -i, --input FILE   input file (may be repeated to compile several files)
 #   -o, --output FILE  output file
 #   -c, --compile      compile .syh into a self-contained .py
+#   --py               generate only the intermediate .py for a manual PyInstaller build
 #   -elf               compile .syh into a binary (ELF on Linux) via PyInstaller
 #   -exe               compile .syh into a binary (EXE on Windows) via PyInstaller
+#   -k, --keep-intermediate  keep the intermediate .py when building a binary
 #   -d, --decompile    decompile a compiled .py (or BSYHC binary) back into .syh
 #   --merge MODE       how to merge several inputs: concat (default) or include
 #   --split            decompile each source file separately (into -o directory)
@@ -34,7 +38,6 @@ import tempfile
 VERSION = "1.0.0"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 INTERPRETER_FILE = os.path.join(BASE_DIR, "main.py")
-
 
 def bsyhc_error(message: str):
     print(f"BSYHC Error: {message}")
@@ -144,27 +147,31 @@ def find_env_python() -> str:
     return sys.executable
 
 
-def compile_binary(inputs: list, output: str, mode: str, target: str):
+def pyinstaller_command(script: str, name: str, workdir: str = None) -> list:
+    cmd = [find_pyinstaller(), "--onefile", "--noconfirm", "--name", name]
+    if workdir:
+        cmd += [
+            "--distpath", os.path.join(workdir, "dist"),
+            "--workpath", os.path.join(workdir, "build"),
+            "--specpath", workdir,
+        ]
+    cmd.append(script)
+    return cmd
+
+
+def compile_binary(inputs: list, output: str, mode: str, target: str, keep_intermediate: bool = False):
     if target == "elf" and sys.platform == "win32":
         bsyhc_error("-elf produces an ELF binary, which can only be built on Linux.")
     if target == "exe" and sys.platform != "win32":
         print("BSYHC: note: PyInstaller cannot cross-compile; on this platform -exe will produce a "
               "native binary named like an EXE (a real Windows .exe requires building on Windows).")
-    pyinstaller = find_pyinstaller()
     workdir = tempfile.mkdtemp(prefix="bsyhc_build_")
     try:
         entry_py = os.path.join(workdir, "entry.py")
         compile_files(inputs, entry_py, mode, quiet=True)
         out_name = os.path.splitext(os.path.basename(output))[0] or "program"
         dist_dir = os.path.join(workdir, "dist")
-        cmd = [
-            pyinstaller, "--onefile", "--noconfirm",
-            "--name", out_name,
-            "--distpath", dist_dir,
-            "--workpath", os.path.join(workdir, "build"),
-            "--specpath", workdir,
-            entry_py,
-        ]
+        cmd = pyinstaller_command(entry_py, out_name, workdir)
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
             bsyhc_error(f"PyInstaller failed:\n{result.stdout}\n{result.stderr}")
@@ -176,6 +183,12 @@ def compile_binary(inputs: list, output: str, mode: str, target: str):
             os.chmod(output, 0o755)
         print(f"BSYHC: compiled {len(inputs)} file(s) into binary '{output}' "
               f"({target.upper()}, via PyInstaller).")
+        if keep_intermediate:
+            intermediate_out = output + ".py"
+            shutil.copy2(entry_py, intermediate_out)
+            print(f"BSYHC: intermediate .py kept as '{intermediate_out}'")
+            print(f"BSYHC: rebuild manually with: "
+                  f"{' '.join(pyinstaller_command(intermediate_out, out_name))}")
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
 
@@ -346,6 +359,8 @@ def build_parser() -> argparse.ArgumentParser:
                "  python3 bsyhc.py -i b.syh -c -o bsyhc-test-b.py\n"
                "  python3 bsyhc.py -i b.syh -c -elf -o b_bin\n"
                "  python3 bsyhc.py -i b.syh -c -exe -o b.exe\n"
+               "  python3 bsyhc.py -i b.syh -c -elf -o b_bin -k\n"
+               "  python3 bsyhc.py -i b.syh --py -o app.py\n"
                "  python3 bsyhc.py -i bsyhc-test-b.py -d -o b-de.syh\n"
                "  python3 bsyhc.py -i b_bin -d -o b-de.syh\n"
                "  python3 bsyhc.py -i b.syh",
@@ -356,12 +371,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("-o", "--output", metavar="FILE", help="output file (default: <input>.py / <input>.syh / <input>.elf / <input>.exe)")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("-c", "--compile", action="store_true", help="compile .syh into a self-contained .py")
+    mode.add_argument("--py", action="store_true",
+                      help="generate only the intermediate self-contained .py for a manual PyInstaller "
+                           "build (no binary is built; the exact PyInstaller command is printed)")
     mode.add_argument("-d", "--decompile", action="store_true", help="decompile a compiled .py (or BSYHC binary) back into .syh")
     target = parser.add_mutually_exclusive_group()
     target.add_argument("-elf", "--elf", dest="elf", action="store_true",
                         help="with -c: compile into a native ELF binary via PyInstaller (Linux)")
     target.add_argument("-exe", "--exe", dest="exe", action="store_true",
                         help="with -c: compile into an EXE binary via PyInstaller (Windows)")
+    parser.add_argument("-k", "--keep-intermediate", action="store_true",
+                        help="with -c -elf / -c -exe: keep the intermediate .py next to the binary "
+                             "(as <output>.py) and print the PyInstaller command for a manual rebuild")
     parser.add_argument("--merge", choices=["concat", "include"], default="concat",
                         help="how to merge several inputs: concat (default) or include (labels of extra files get 'name.' prefix)")
     parser.add_argument("--split", action="store_true",
@@ -380,12 +401,27 @@ def main():
             bsyhc_error("--split is only valid with -d (decompile).")
         target = "elf" if args.elf else "exe"
         output = args.output or os.path.splitext(args.input[0])[0] + ("." + target)
-        compile_binary(args.input, output, args.merge, target)
+        compile_binary(args.input, output, args.merge, target,
+                       keep_intermediate=args.keep_intermediate)
     elif args.compile:
         if args.split:
             bsyhc_error("--split is only valid with -d (decompile).")
+        if args.keep_intermediate:
+            bsyhc_error("-k / --keep-intermediate is only valid together with -c -elf / -c -exe "
+                        "(with plain -c the output already is the intermediate .py).")
         output = args.output or os.path.splitext(args.input[0])[0] + ".py"
         compile_files(args.input, output, args.merge)
+    elif args.py:
+        if args.split:
+            bsyhc_error("--split is only valid with -d (decompile).")
+        if args.keep_intermediate:
+            bsyhc_error("-k / --keep-intermediate is only valid together with -c -elf / -c -exe "
+                        "(with --py the output already is the intermediate .py).")
+        output = args.output or os.path.splitext(args.input[0])[0] + ".py"
+        compile_files(args.input, output, args.merge)
+        name = os.path.splitext(os.path.basename(output))[0] or "program"
+        print(f"BSYHC: next step: build a binary manually with:\n"
+              f"  {' '.join(pyinstaller_command(output, name))}")
     elif args.decompile:
         if len(args.input) != 1:
             bsyhc_error("-d accepts exactly one input file.")
