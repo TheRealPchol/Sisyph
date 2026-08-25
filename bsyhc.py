@@ -35,7 +35,7 @@ import subprocess
 import sys
 import tempfile
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 INTERPRETER_FILE = os.path.join(BASE_DIR, "main.py")
 
