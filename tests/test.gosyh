@@ -1,0 +1,14 @@
+// #include clib.h
+#include ./lib.gosyh
+
+@main
+goto foo
+goto exit
+
+
+@foo
+pass // Simulate working 
+goto back
+
+@exit
+exit 0
