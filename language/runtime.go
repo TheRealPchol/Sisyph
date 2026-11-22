@@ -29,38 +29,41 @@ func (r *Language) expandDefines(line string) string {
 	return line
 }
 
-func (r *Language) preprocessFile(filename string, visited map[string]bool, lineOffset int) ([]string, map[string]int) {
+func (r *Language) preprocessFile(filename string, lines []string, visited map[string]bool, lineOffset int) ([]string, map[string]int) {
 	if visited[filename] {
 		return nil, nil
 	}
 	visited[filename] = true
 
-	exists, err := tools.FileExists(filename)
-	if err != nil {
-		(&GoSyhException{
-			"GoError",
-			"Error checking file existence",
-			filename,
-			lineOffset,
-			"",
-			err,
-			1,
-		}).Raise()
-	}
-	if !exists {
-		(&GoSyhException{
-			"GoError",
-			"File not found",
-			filename,
-			lineOffset,
-			"",
-			nil,
-			1,
-		}).Raise()
-	}
-
 	absPath, _ := tools.AbsPath(filename)
-	file := tools.Read(absPath)
+
+	file := lines
+	if file == nil {
+		exists, err := tools.FileExists(filename)
+		if err != nil {
+			(&GoSyhException{
+				"GoError",
+				"Error checking file existence",
+				filename,
+				lineOffset,
+				"",
+				err,
+				1,
+			}).Raise()
+		}
+		if !exists {
+			(&GoSyhException{
+				"GoError",
+				"File not found",
+				filename,
+				lineOffset,
+				"",
+				nil,
+				1,
+			}).Raise()
+		}
+		file = tools.Read(absPath)
+	}
 
 	result := make([]string, 0)
 	included := make([]string, 0)
@@ -121,7 +124,7 @@ func (r *Language) preprocessFile(filename string, visited map[string]bool, line
 
 			var incLines []string
 			var incLinesLabels map[string]int
-			incLines, incLinesLabels = r.preprocessFile(incFile, visited, currentLine)
+			incLines, incLinesLabels = r.preprocessFile(incFile, nil, visited, currentLine)
 			for k, v := range incLinesLabels {
 				includedLabels[k] = v
 			}
@@ -145,11 +148,60 @@ func (r *Language) Preprocessor(lines []string, filename string) []string {
 	r.defines = make(map[string]string)
 	visited := make(map[string]bool)
 
-	result, labels := r.preprocessFile(filename, visited, 0)
+	result, labels := r.preprocessFile(filename, lines, visited, 0)
 
 	for k, v := range labels {
 		context.Labels[k] = v
 	}
 
 	return result
+}
+
+func (l *Language) ExecuteLines(lines []string, filename string) {
+	l.Filename = filename
+	lines = l.Preprocessor(lines, filename)
+	for _, line := range lines {
+		l.ExecuteLine(line)
+	}
+}
+
+func (l *Language) ExecuteFile(filename string) {
+	fexists, err := tools.FileExists(filename)
+	if err != nil {
+		(&GoSyhException{
+			"GoError",
+			"Error checking file existence",
+			filename,
+			0,
+			"",
+			err,
+			1,
+		}).Raise()
+	}
+	if !fexists {
+		(&GoSyhException{
+			"FileNotFoundError",
+			"File '" + filename + "' not found",
+			filename,
+			0,
+			"",
+			nil,
+			5,
+		}).Raise()
+	}
+
+	lines, err := tools.ReadFile(filename)
+	if err != nil {
+		(&GoSyhException{
+			"ReadFileError",
+			"Error in reading file '" + filename + "'",
+			filename,
+			0,
+			"",
+			err,
+			6,
+		}).Raise()
+	}
+
+	l.ExecuteLines(lines, filename)
 }

@@ -12,9 +12,17 @@ func Use(s any) any {
 }
 
 func Read(filename string) []string {
-	file, _ := os.ReadFile(filename)
-	lines := strings.Split(string(file), "\n")
+	lines, _ := ReadFile(filename)
 	return lines
+}
+
+func ReadFile(filename string) ([]string, error) {
+	file, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	lines := strings.Split(string(file), "\n")
+	return lines, nil
 }
 
 func FileExists(path string) (bool, error) {
